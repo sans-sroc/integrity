@@ -81,6 +81,10 @@ To generate more, install go on your machine and set the environment variables `
 | windows | 386 |
 | windows | amd64 |
 
+This list was gathered from [DigitalOcean](https://www.digitalocean.com/community/tutorials/how-to-build-go-executables-for-multiple-platforms-on-ubuntu-16-04).
+
+You can find a complete list of `GOOS` and `GOARCH` values [here](https://github.com/golang/go/blob/master/src/go/build/syslist.go).
+
 You can build like so on a Linux/macOS system:
 
 ```
