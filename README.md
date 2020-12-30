@@ -92,5 +92,7 @@ env GOOS=solaris GOARCH=amd64 go build -o binaries/integrity-solaris-amd64 integ
 You can also build with Docker if you're uneasy installing go on your machine (or just prefer to use Docker):
 
 ```
-docker run -it --rm -v ${PWD}:/usr/src/integrity -w /usr/src/integrity golang env GOOS=solaris GOARCH=amd64 go build -o binaries/integrity-solaris-amd64 integrity.go
+docker run -it --rm -v ${PWD}:/usr/src/integrity -w /usr/src/integrity \
+    golang env GOOS=solaris GOARCH=amd64 go build \
+    -o binaries/integrity-solaris-amd64 integrity.go
 ```
