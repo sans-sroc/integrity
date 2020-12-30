@@ -80,3 +80,9 @@ To generate more, install go on your machine and set the environment variables `
 | solaris | amd64 |
 | windows | 386 |
 | windows | amd64 |
+
+You can build like so:
+
+```
+env GOOS=solaris GOARCH=amd64 go build -o binaries/integrity-solaris-amd64 integrity.go
+```
