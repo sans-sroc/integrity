@@ -1,5 +1,7 @@
 # integrity
 
+[![GitHub Super-Linter](https://github.com/sans-blue-team/integrity/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
+
 ## Command line flags
 
 - `-d`: Specify directory (defaults to current directory)
