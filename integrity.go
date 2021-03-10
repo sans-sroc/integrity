@@ -1,17 +1,17 @@
 package main
 
 import (
-    "time"
-    "strings"
-    "path/filepath"
-    "flag"
     "crypto/sha256"
     "encoding/hex"
+    "flag"
     "fmt"
     "io"
     "io/ioutil"
     "os"
     "os/user"
+    "path/filepath"
+    "strings"
+    "time"
 )
 
 // Error handling function
@@ -22,20 +22,20 @@ func check(e error) {
 }
 
 // Hash the file
-func hash_file_sha256(filePath string) (string, error) {
-    var SHA256String string
+func hashFileSha256(filePath string) (string, error) {
+    var sha256String string
     file, err := os.Open(filePath)
     if err != nil {
-    	return SHA256String, err
+    	return sha256String, err
     }
     defer file.Close()
     hash := sha256.New()
     if _, err := io.Copy(hash, file); err != nil {
-    	return SHA256String, err
+    	return sha256String, err
     }
     hashInBytes := hash.Sum(nil)[:32]
-    SHA256String = hex.EncodeToString(hashInBytes)
-    return SHA256String, nil
+    sha256String = hex.EncodeToString(hashInBytes)
+    return sha256String, nil
 }
 
 // Create VERSION file and add headings
@@ -44,6 +44,7 @@ func createVerFile(verFile string) {
     check(err)
     timestamp := time.Now().Format(time.RFC3339)
     f, err := os.OpenFile(verFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    check(err)
     defer f.Close()
     _, err = f.WriteString("# integrity 1.0.0 output generated on " + timestamp + " by " + user.Name + "\n")
     check(err)
@@ -51,16 +52,19 @@ func createVerFile(verFile string) {
     check(err)
     _, err = f.WriteString("# Filename: SHA256\n")
     check(err)
-    f.Sync()
+    err = f.Sync()
+    check(err)
 }
 
 // Add data for hashed file to VERSION file
-func appendVerFile(verFile string, fileName string, SHA256String string) {
+func appendVerFile(verFile string, fileName string, sha256String string) {
     f, err := os.OpenFile(verFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
     check(err)
     defer f.Close()
-    _, err = f.WriteString(fileName + ": " + SHA256String + "\n")
-    f.Sync()
+    _, err = f.WriteString(fileName + ": " + sha256String + "\n")
+    check(err)
+    err = f.Sync()
+    check(err)
 }
 
 // Main function
@@ -77,25 +81,27 @@ func main() {
     }
 
     // Create VERISON FILE ENTRIES
-    if validateVal == false {
+    if !validateVal {
         fmt.Println("[+] Working directory:", *dirPtr)
         _, err := os.Stat(*dirPtr + "/VERSION-" + *verPtr)
         if (err == nil) {
             fmt.Println("[!] VERSION file already exists! Overwriting!")
             err = os.Remove(*dirPtr + "/VERSION-" + *verPtr)
+            check(err)
         }
         createVerFile(*dirPtr + "/VERSION-" + *verPtr)
 
         err = filepath.Walk(*dirPtr,
         func(path string, info os.FileInfo, err error) error {
-            pathCheck, _ := os.Stat(path)
+            pathCheck, err2 := os.Stat(path)
+            check(err2)
             if ! pathCheck.IsDir() {
                 fmt.Println("[+] Processing " + path + "...")
-                hash, err := hash_file_sha256(path)
-                check(err)
-                if err == nil {
-                    fileName, err := filepath.Rel(*dirPtr, path)
-                    check(err)
+                hash, err2 := hashFileSha256(path)
+                check(err2)
+                if err2 == nil {
+                    fileName, err2 := filepath.Rel(*dirPtr, path)
+                    check(err2)
                     if (fileName != "VERSION-" + *verPtr) {
                         appendVerFile(*dirPtr + "/VERSION-" + *verPtr, fileName, hash)
                     }
@@ -103,8 +109,9 @@ func main() {
             }
             return nil
         })
+        check(err)
     } else {
-        //Validate existing VERSION file
+        // Validate existing VERSION file
         var failed = false
         verFile := *dirPtr + "/VERSION-" + *verPtr
         _, err := os.Stat(verFile)
@@ -114,12 +121,13 @@ func main() {
         vfString := string(verBytes)
         err = filepath.Walk(*dirPtr,
         func(path string, info os.FileInfo, err error) error {
-            pathCheck, _ := os.Stat(path)
+            pathCheck, err2 := os.Stat(path)
+            check(err2)
             if ! pathCheck.IsDir() {
-                hash, err := hash_file_sha256(path)
-                check(err)
-                fileName, err := filepath.Rel(*dirPtr, path)
-                check(err)
+                hash, err2 := hashFileSha256(path)
+                check(err2)
+                fileName, err2 := filepath.Rel(*dirPtr, path)
+                check(err2)
                 if (! strings.Contains(vfString, fileName + ": " + hash)) && (fileName != "VERSION-" + *verPtr) {
                     fmt.Println("[!] Validation failed!")
                     fmt.Println("    File: " + fileName)
@@ -128,7 +136,8 @@ func main() {
                 }
             }
             return nil
-        })        
+        })
+        check(err) 
         if !failed {
             fmt.Println("[+] Validation succeeded!")
         }
