@@ -12,6 +12,8 @@
 
 - `-v`: Verify that the files created earlier by this tool have not changed
 
+- `-j`: Output results as JSON instead of writing a VERSION file
+
 ## Examples
 
 Create VERSION-TEST manifest file in current directory
@@ -36,6 +38,12 @@ Verify VERSION-TEST manifest file in the `/tmp` directory
 
 ```bash
 integrity -c TEST -d /tmp -v
+```
+
+Output results as JSON
+
+```bash
+integrity -c TEST -j
 ```
 
 ## Building additional versions
