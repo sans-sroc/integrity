@@ -1,12 +1,14 @@
 # integrity
 
+[![GitHub Super-Linter](https://github.com/sans-blue-team/integrity/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
+
 ## Command line flags
 
 - `-d`: Specify directory (defaults to current directory)
 
 - `-c`: Specify suffix to VERSION file
 
-    - For example, `-c SEC123-21-01` could create the file `VERSION-SEC123-21-01`
+  - For example, `-c SEC123-21-01` could create the file `VERSION-SEC123-21-01`
 
 - `-v`: Verify that the files created earlier by this tool have not changed
 
@@ -14,25 +16,25 @@
 
 Create VERSION-TEST manifest file in current directory
 
-```
+```bash
 integrity -c TEST
 ```
 
 Create VERSION-TEST manifest file in the `/tmp` directory
 
-```
+```bash
 integrity -c TEST -d /tmp
 ```
 
 Verify VERSION-TEST manifest file in current working directory
 
-```
+```bash
 integrity -c TEST -v
 ```
 
 Verify VERSION-TEST manifest file in the `/tmp` directory
 
-```
+```bash
 integrity -c TEST -d /tmp -v
 ```
 
@@ -87,7 +89,7 @@ You can find a complete list of `GOOS` and `GOARCH` values [here](https://github
 
 You can build like so on a Linux/macOS system:
 
-```
+```bash
 env GOOS=solaris GOARCH=amd64 go build -o binaries/integrity-solaris-amd64 integrity.go
 ```
 
@@ -95,7 +97,7 @@ env GOOS=solaris GOARCH=amd64 go build -o binaries/integrity-solaris-amd64 integ
 
 You can also build with Docker if you're uneasy installing go on your machine (or just prefer to use Docker):
 
-```
+```bash
 docker run -it --rm -v ${PWD}:/usr/src/integrity -w /usr/src/integrity \
     golang env GOOS=solaris GOARCH=amd64 go build \
     -o binaries/integrity-solaris-amd64 integrity.go
