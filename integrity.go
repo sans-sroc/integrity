@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -141,6 +142,13 @@ func main() {
 		verBytes, err := ioutil.ReadFile(verFile)
 		check(err, "Cannot read VERSION file")
 		vfString := string(verBytes)
+		cfileNames := make(map[string]string)
+		ofileNames := make(map[string]string)
+		re := regexp.MustCompile("(?m)^(^[^#][^:]+):(.*)$")
+		allFiles := re.FindAllStringSubmatch(vfString, -1)
+		for i := 0; i < len(allFiles); i++ {
+			ofileNames[allFiles[i][1]] = allFiles[i][2]
+		}
 		err = filepath.Walk(*dirPtr,
 			func(path string, info os.FileInfo, err error) error {
 				pathCheck, err2 := os.Stat(path)
@@ -150,8 +158,11 @@ func main() {
 					check(err2, "Cannot hash file")
 					fileName, err2 := filepath.Rel(*dirPtr, path)
 					check(err2, "Cannot find file")
+					if fileName != "VERSION-"+*verPtr {
+						cfileNames[fileName] = hash
+					}
 					if (!strings.Contains(vfString, fileName+": "+hash)) && (fileName != "VERSION-"+*verPtr) {
-						fmt.Println("[!] Validation failed!")
+						fmt.Println("[!] Validation failed! File has been added!")
 						fmt.Println("    File: " + fileName)
 						fmt.Println("    Hash: " + hash)
 						failed = true
@@ -159,7 +170,20 @@ func main() {
 				}
 				return nil
 			})
+		for name, hash := range ofileNames {
+			if _, ok := cfileNames[name]; !ok {
+				fmt.Println("[!] Validation failed! Original file missing!")
+				fmt.Println("    File: " + name)
+				fmt.Println("    Hash: " + hash)
+				failed = true
+			}
+		}
 		check(err, "Validation failed")
 		fmt.Println("[+] Validation process complete!")
+		if failed {
+			fmt.Println("[!] Result: FAIL!")
+		} else {
+			fmt.Println("[+] Result: SUCCESS!")
+		}
 	}
 }
