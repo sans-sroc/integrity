@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/sha256"
 	"encoding/hex"
 	"flag"
@@ -80,7 +81,7 @@ func appendVerFile(verFile string, fileName string, sha256String string) {
 	}
 }
 
-func validateFiles(directory string, version string, parts bool) {
+func validateFiles(directory string, version string, parts bool) bool {
 	var failed = false
 	verFile := ""
 	if parts {
@@ -140,11 +141,7 @@ func validateFiles(directory string, version string, parts bool) {
 	}
 	check(err, "Validation failed")
 	fmt.Println("[+] Validation process complete!")
-	if failed {
-		fmt.Println("[!] Result: FAIL!")
-	} else {
-		fmt.Println("[+] Result: SUCCESS!")
-	}
+	return failed
 }
 
 // Main function
@@ -161,8 +158,12 @@ func main() {
 	verVal := *verPtr
 	validateVal := *validatePtr
 	if verVal == "UNDEFINED" {
-		fmt.Println("You MUST define a Courseware Version Identifier (e.g., 'integrity -c SEC123-21-01')")
-		os.Exit(1)
+		fmt.Print("Enter a Courseware Version Identifier (e.g., 'SEC123-21-01'): ")
+		reader := bufio.NewReader(os.Stdin)
+		input, err := reader.ReadString('\n')
+		check(err, "Invalid input")
+		input = strings.Replace(input, "\n", "", -1)
+		*verPtr = input
 	}
 
 	// Process Files
@@ -211,6 +212,11 @@ func main() {
 		}
 	} else {
 		// Validate existing VERSION file(s)
-		validateFiles(*dirPtr, *verPtr, *partsPtr)
+		failed := validateFiles(*dirPtr, *verPtr, *partsPtr)
+		if failed {
+			fmt.Println("[!] Result: FAIL!")
+		} else {
+			fmt.Println("[+] Result: SUCCESS!")
+		}
 	}
 }
