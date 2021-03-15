@@ -48,15 +48,7 @@ integrity -c TEST -j
 
 ## Building additional versions
 
-The `build.sh` script will generate three versions of the tool at this time (all located in the `binaries` directory):
-
-- macOS (amd64): Tested on macOS Catalina 10.15.7
-
-- Linux (amd64): Tested on Ubuntu Desktop 20.04
-
-- Windows (amd64): Tested on Windows 10 1809
-
-To generate more, install go on your machine and set the environment variables `GOOS` and `GOARCH` for your target system:
+You can find three builds in the Releases section of GitHub, but to generate more, install go on your machine and set the environment variables `GOOS` and `GOARCH` for your target system:
 
 | GOOS | GOARCH |
 |------|--------|
