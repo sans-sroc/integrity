@@ -1,0 +1,32 @@
+name: "pre-release"
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  pre-release:
+    name: "Pre Release"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+    
+      - name: "Build & test"
+        run: |
+          env GOOS=windows GOARCH=amd64 go build -o /tmp/integrity-windows-amd64 integrity.go
+          env GOOS=linux GOARCH=amd64 go build -o /tmp/integrity-linux-amd64 integrity.go
+          env GOOS=darwin GOARCH=amd64 go build -o /tmp/integrity-darwin-amd64 integrity.go
+          
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            /tmp/integrity*
