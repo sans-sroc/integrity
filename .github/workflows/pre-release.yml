@@ -3,7 +3,7 @@ name: "pre-release"
 on:
   push:
     branches:
-      - "master"
+      - "main"
 
 jobs:
   pre-release:
@@ -11,6 +11,11 @@ jobs:
     runs-on: "ubuntu-latest"
 
     steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+    
       - name: "Build & test"
         run: |
           env GOOS=windows GOARCH=amd64 go build -o /tmp/integrity-windows-amd64 integrity.go
