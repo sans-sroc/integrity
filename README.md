@@ -15,27 +15,29 @@
 
 - `-j`: Output results as JSON instead of writing a VERSION file
 
+- `-p`: Only verify the "-part" version file
+
 ## Examples
 
-Create VERSION-TEST manifest file in current directory
+Create VERSION-TEST.txt manifest file in current directory
 
 ```bash
 integrity -c TEST
 ```
 
-Create VERSION-TEST manifest file in the `/tmp` directory
+Create VERSION-TEST.txt manifest file in the `/tmp` directory
 
 ```bash
 integrity -c TEST -d /tmp
 ```
 
-Verify VERSION-TEST manifest file in current working directory
+Verify VERSION-TEST.txt manifest file in current working directory
 
 ```bash
 integrity -c TEST -v
 ```
 
-Verify VERSION-TEST manifest file in the `/tmp` directory
+Verify VERSION-TEST.txt manifest file in the `/tmp` directory
 
 ```bash
 integrity -c TEST -d /tmp -v
