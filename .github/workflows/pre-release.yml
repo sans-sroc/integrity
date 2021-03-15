@@ -1,4 +1,4 @@
-name: "pre-release"
+name: "Binary Build"
 
 on:
   push:
