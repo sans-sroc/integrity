@@ -113,20 +113,11 @@ func validateFiles(directory string, version string, parts bool) bool {
 				if (fileName != "VERSION-"+version+".txt") && (fileName != "VERSION-"+version+"-part.txt") {
 					cfileNames[fileName] = hash
 				}
-				if parts {
-					if (!strings.Contains(vfString, fileName+": "+hash)) && (fileName != "VERSION-"+version+".txt") && (fileName != "VERSION-"+version+"-part.txt") && (!strings.Contains(fileName, "get_first")) {
-						fmt.Println("[!] Validation failed! File has been added!")
-						fmt.Println("    File: " + fileName)
-						fmt.Println("    Hash: " + hash)
-						failed = true
-					}
-				} else {
-					if (!strings.Contains(vfString, fileName+": "+hash)) && (fileName != "VERSION-"+version+".txt") && (fileName != "VERSION-"+version+"-part.txt") {
-						fmt.Println("[!] Validation failed! File has been added!")
-						fmt.Println("    File: " + fileName)
-						fmt.Println("    Hash: " + hash)
-						failed = true
-					}
+				if ((!strings.Contains(vfString, fileName+": "+hash)) && (fileName != "VERSION-"+version+".txt") && (fileName != "VERSION-"+version+"-part.txt") && (!strings.Contains(fileName, "get_first")) && parts) || ((!strings.Contains(vfString, fileName+": "+hash)) && (fileName != "VERSION-"+version+".txt") && (fileName != "VERSION-"+version+"-part.txt") && !parts) {
+					fmt.Println("[!] Validation failed! File has been added!")
+					fmt.Println("    File: " + fileName)
+					fmt.Println("    Hash: " + hash)
+					failed = true
 				}
 			}
 			return nil
