@@ -16,6 +16,8 @@ import (
 	"time"
 )
 
+var rel_ver = "1.0.3"
+
 // Error handling function
 func check(e error, m string) {
 	if e != nil {
@@ -48,7 +50,7 @@ func createVerFile(verFile string) {
 	f, err := os.OpenFile(verFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	check(err, "Cannot open file")
 	defer f.Close()
-	_, err = f.WriteString("# integrity 1.0.0 output generated on " + timestamp + " by " + user.Name + "\n")
+	_, err = f.WriteString("# integrity " + rel_ver + " output generated on " + timestamp + " by " + user.Name + "\n")
 	check(err, "Cannot write to file")
 	_, err = f.WriteString("# " + strings.Join(os.Args, " ") + "\n")
 	check(err, "Cannot write to file")
@@ -70,7 +72,8 @@ func appendVerFile(verFile string, fileName string, sha256String string) {
 	check(err, "Cannot write to file")
 
 	// Part VERSION file
-	if !strings.Contains(fileName, "get_first") {
+	match, _ := regexp.MatchString("get[-_]first", fileName)
+	if !match {
 		f, err := os.OpenFile(verFile+"-part.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		check(err, "Cannot open file")
 		defer f.Close()
@@ -79,13 +82,29 @@ func appendVerFile(verFile string, fileName string, sha256String string) {
 		err = f.Sync()
 		check(err, "Cannot write to file")
 	}
+
+	// First VERSION file
+	if match {
+		f, err := os.OpenFile(verFile+"-first.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		check(err, "Cannot open file")
+		defer f.Close()
+		_, err = f.WriteString(filepath.Base(fileName) + ": " + sha256String + "\n")
+		check(err, "Cannot write to file")
+		err = f.Sync()
+		check(err, "Cannot write to file")
+	}
+
 }
 
-func validateFiles(directory string, version string, parts bool) bool {
+func validateFiles(directory string, version string, parts bool, first bool, json bool) bool {
 	var failed = false
+	jsonFirst := true
+	jsonOutput := "{\n\t\"files\": [\n"
 	verFile := ""
 	if parts {
 		verFile = directory + "/VERSION-" + version + "-part.txt"
+	} else if first {
+		verFile = directory + "/VERSION-" + version + "-first.txt"
 	} else {
 		verFile = directory + "/VERSION-" + version + ".txt"
 	}
@@ -96,10 +115,10 @@ func validateFiles(directory string, version string, parts bool) bool {
 	vfString := string(verBytes)
 	cfileNames := make(map[string]string)
 	ofileNames := make(map[string]string)
-	re := regexp.MustCompile("(?m)^(^[^#][^:]+):(.*)$")
+	re := regexp.MustCompile("(?m)(^[^#][^:]+):(.*)$")
 	allFiles := re.FindAllStringSubmatch(vfString, -1)
 	for i := 0; i < len(allFiles); i++ {
-		ofileNames[allFiles[i][1]] = allFiles[i][2]
+		ofileNames[allFiles[i][1]] = strings.TrimSpace(allFiles[i][2])
 	}
 	err = filepath.Walk(directory,
 		func(path string, info os.FileInfo, err error) error {
@@ -110,38 +129,77 @@ func validateFiles(directory string, version string, parts bool) bool {
 				check(err2, "Cannot hash file")
 				fileName, err2 := filepath.Rel(directory, path)
 				check(err2, "Cannot find file")
-				if (fileName != "VERSION-"+version+".txt") && (fileName != "VERSION-"+version+"-part.txt") {
+				match, _ := regexp.MatchString("VERSION-"+version+".*\\.txt", fileName)
+				if !match {
 					cfileNames[fileName] = hash
-				}
-				if ((!strings.Contains(vfString, fileName+": "+hash)) && (fileName != "VERSION-"+version+".txt") && (fileName != "VERSION-"+version+"-part.txt") && (!strings.Contains(fileName, "get_first")) && parts) || ((!strings.Contains(vfString, fileName+": "+hash)) && (fileName != "VERSION-"+version+".txt") && (fileName != "VERSION-"+version+"-part.txt") && !parts) {
-					fmt.Println("[!] Validation failed! File has been added!")
-					fmt.Println("    File: " + fileName)
-					fmt.Println("    Hash: " + hash)
-					failed = true
+					if _, ok := ofileNames[fileName]; !ok {
+						if !json {
+							fmt.Println("[!] Validation failed! File has been added!")
+							fmt.Println("    File: " + fileName)
+							fmt.Println("    Hash: " + hash)
+							failed = true
+						} else {
+							if !jsonFirst {
+								jsonOutput += ",\n"
+							}
+							jsonOutput = jsonOutput + "\t\t{\n\t\t\t\"fileName\": \"" + fileName + "\",\n\t\t\t\"hash\": \"" + hash + "\",\n\t\t\t\"status\": \"new\"\n\t\t}"
+							jsonFirst = false
+						}
+					}
+					if _, ok := ofileNames[fileName]; ok {
+						if ofileNames[fileName] != hash {
+							if !json {
+								fmt.Println("[!] Validation failed! File contents have been modified!")
+								fmt.Println("    File: " + fileName)
+								fmt.Println("    Hash: " + hash)
+								failed = true
+							} else {
+								if !jsonFirst {
+									jsonOutput += ",\n"
+								}
+								jsonOutput = jsonOutput + "\t\t{\n\t\t\t\"fileName\": \"" + fileName + "\",\n\t\t\t\"hash\": \"" + hash + "\",\n\t\t\t\"status\": \"failed\"\n\t\t}"
+								jsonFirst = false
+							}
+						}
+					}
 				}
 			}
 			return nil
 		})
 	for name, hash := range ofileNames {
 		if _, ok := cfileNames[name]; !ok {
-			fmt.Println("[!] Validation failed! Original file missing!")
-			fmt.Println("    File: " + name)
-			fmt.Println("    Hash: " + hash)
-			failed = true
+			if !json {
+				fmt.Println("[!] Validation failed! Original file missing!")
+				fmt.Println("    File: " + name)
+				fmt.Println("    Hash: " + hash)
+				failed = true
+			} else {
+				if !jsonFirst {
+					jsonOutput += ",\n"
+				}
+				jsonOutput = jsonOutput + "\t\t{\n\t\t\t\"fileName\": \"" + name + "\",\n\t\t\t\"hash\": \"" + hash + "\",\n\t\t\t\"status\": \"missing\"\n\t\t}"
+				jsonFirst = false
+			}
 		}
 	}
-	check(err, "Validation failed")
-	fmt.Println("[+] Validation process complete!")
+	if json {
+		jsonOutput += "\n\t]\n}"
+		fmt.Println(jsonOutput)
+	} else {
+		check(err, "Validation failed")
+		fmt.Println("[+] Validation process complete!")
+	}
 	return failed
 }
 
 // Main function
 func main() {
 	dirPtr := flag.String("d", ".", "Target directory")
-	validatePtr := flag.Bool("v", false, "Validate existing VERSION file")
 	verPtr := flag.String("c", "UNDEFINED", "Courseware Version Indentifier")
 	jsonPtr := flag.Bool("j", false, "Output data in JSON format to stdout")
-	partsPtr := flag.Bool("p", false, "Verify the VERSION-part.txt file")
+	validatePtr := flag.Bool("v", false, "Validate existing VERSION file")
+	partsPtr := flag.Bool("p", false, "Validate the VERSION-part.txt file")
+	firstPtr := flag.Bool("f", false, "Validate the VERSION-first.txt file")
 	flag.Parse()
 	jsonVal := *jsonPtr
 	jsonOutput := ""
@@ -158,7 +216,7 @@ func main() {
 	}
 
 	// Process Files
-	if !validateVal {
+	if !validateVal && !*partsPtr && !*firstPtr {
 		if !jsonVal {
 			fmt.Println("[+] Working directory:", *dirPtr)
 			_, err := os.Stat(*dirPtr + "/VERSION-" + *verPtr + ".txt")
@@ -203,11 +261,13 @@ func main() {
 		}
 	} else {
 		// Validate existing VERSION file(s)
-		failed := validateFiles(*dirPtr, *verPtr, *partsPtr)
-		if failed {
-			fmt.Println("[!] Result: FAIL!")
-		} else {
-			fmt.Println("[+] Result: SUCCESS!")
+		failed := validateFiles(*dirPtr, *verPtr, *partsPtr, *firstPtr, jsonVal)
+		if !jsonVal {
+			if failed {
+				fmt.Println("[!] Result: FAIL!")
+			} else {
+				fmt.Println("[+] Result: SUCCESS!")
+			}
 		}
 	}
 }

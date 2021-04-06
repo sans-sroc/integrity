@@ -17,6 +17,8 @@
 
 - `-p`: Only verify the "-part" version file
 
+- `-f`: Only verify the "-first" version file
+
 ## Examples
 
 Create VERSION-TEST.txt manifest file in current directory
@@ -43,10 +45,16 @@ Verify VERSION-TEST.txt manifest file in the `/tmp` directory
 integrity -c TEST -d /tmp -v
 ```
 
-Output results as JSON
+Output results as JSON (no VERSION file is created)
 
 ```bash
 integrity -c TEST -j
+```
+
+Verify VERSION-TEST.txt manifest in the `/tmp` directory and output the results in JSON
+
+```bash
+integrity -c TEST -d /tmp -v -j
 ```
 
 ## Building additional versions
