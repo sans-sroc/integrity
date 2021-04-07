@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-var rel_ver = "1.0.3"
+var rel_ver = "1.0.4"
 
 // Error handling function
 func check(e error, m string) {
@@ -61,7 +61,7 @@ func createVerFile(verFile string) {
 }
 
 // Add data for hashed file to VERSION file
-func appendVerFile(verFile string, fileName string, sha256String string) {
+func appendVerFile(verFile string, fileName string, sha256String string, dirVal string) {
 	// Main VERSION file
 	f, err := os.OpenFile(verFile+".txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	check(err, "Cannot open file")
@@ -72,26 +72,29 @@ func appendVerFile(verFile string, fileName string, sha256String string) {
 	check(err, "Cannot write to file")
 
 	// Part VERSION file
-	match, _ := regexp.MatchString("get[-_]first", fileName)
-	if !match {
-		f, err := os.OpenFile(verFile+"-part.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		check(err, "Cannot open file")
-		defer f.Close()
-		_, err = f.WriteString(fileName + ": " + sha256String + "\n")
-		check(err, "Cannot write to file")
-		err = f.Sync()
-		check(err, "Cannot write to file")
-	}
+	_, err1 := os.Stat(dirVal + "/get_first")
+	if err1 == nil {
+		match, _ := regexp.MatchString("get[-_]first", fileName)
+		if !match {
+			f, err := os.OpenFile(verFile+"-part.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			check(err, "Cannot open file")
+			defer f.Close()
+			_, err = f.WriteString(fileName + ": " + sha256String + "\n")
+			check(err, "Cannot write to file")
+			err = f.Sync()
+			check(err, "Cannot write to file")
+		}
 
-	// First VERSION file
-	if match {
-		f, err := os.OpenFile(verFile+"-first.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		check(err, "Cannot open file")
-		defer f.Close()
-		_, err = f.WriteString(filepath.Base(fileName) + ": " + sha256String + "\n")
-		check(err, "Cannot write to file")
-		err = f.Sync()
-		check(err, "Cannot write to file")
+		// First VERSION file
+		if match {
+			f, err := os.OpenFile(verFile+"-first.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			check(err, "Cannot open file")
+			defer f.Close()
+			_, err = f.WriteString(filepath.Base(fileName) + ": " + sha256String + "\n")
+			check(err, "Cannot write to file")
+			err = f.Sync()
+			check(err, "Cannot write to file")
+		}
 	}
 
 }
@@ -200,12 +203,21 @@ func main() {
 	validatePtr := flag.Bool("v", false, "Validate existing VERSION file")
 	partsPtr := flag.Bool("p", false, "Validate the VERSION-part.txt file")
 	firstPtr := flag.Bool("f", false, "Validate the VERSION-first.txt file")
+	appVerPtr := flag.Bool("version", false, "Print the integrity version and exit")
 	flag.Parse()
 	jsonVal := *jsonPtr
 	jsonOutput := ""
 	jsonFirst := true
 	verVal := *verPtr
 	validateVal := *validatePtr
+	partsVal := *partsPtr
+	firstVal := *firstPtr
+	appVer := *appVerPtr
+	dirVal := *dirPtr
+	if appVer {
+		fmt.Printf("integrity version %s \n", rel_ver)
+		os.Exit(0)
+	}
 	if verVal == "UNDEFINED" {
 		fmt.Print("Enter a Courseware Version Identifier (e.g., 'SEC123-21-01'): ")
 		reader := bufio.NewReader(os.Stdin)
@@ -216,7 +228,7 @@ func main() {
 	}
 
 	// Process Files
-	if !validateVal && !*partsPtr && !*firstPtr {
+	if !validateVal && !partsVal && !firstVal {
 		if !jsonVal {
 			fmt.Println("[+] Working directory:", *dirPtr)
 			_, err := os.Stat(*dirPtr + "/VERSION-" + *verPtr + ".txt")
@@ -224,6 +236,21 @@ func main() {
 				fmt.Println("[!] VERSION file already exists! Overwriting!")
 				err = os.Remove(*dirPtr + "/VERSION-" + *verPtr + ".txt")
 				check(err, "Cannot delete VERSION file")
+			}
+			_, err1 := os.Stat(*dirPtr + "/VERSION-" + *verPtr + "-part.txt")
+			if err1 == nil {
+				err = os.Remove(*dirPtr + "/VERSION-" + *verPtr + "-part.txt")
+				check(err, "Cannot delete VERSION file")
+			}
+			_, err2 := os.Stat(*dirPtr + "/VERSION-" + *verPtr + "-first.txt")
+			if err2 == nil {
+				err = os.Remove(*dirPtr + "/VERSION-" + *verPtr + "-first.txt")
+				check(err, "Cannot delete VERSION file")
+			}
+			_, err3 := os.Stat(*dirPtr + "/get_first")
+			if err3 == nil {
+				createVerFile(*dirPtr + "/VERSION-" + *verPtr + "-part.txt")
+				createVerFile(*dirPtr + "/VERSION-" + *verPtr + "-first.txt")
 			}
 			createVerFile(*dirPtr + "/VERSION-" + *verPtr + ".txt")
 		} else {
@@ -242,7 +269,7 @@ func main() {
 					fileName, err2 := filepath.Rel(*dirPtr, path)
 					check(err2, "Cannot determine file path")
 					if (!strings.Contains(fileName, "VERSION-"+*verPtr)) && (!jsonVal) {
-						appendVerFile(*dirPtr+"/VERSION-"+*verPtr, fileName, hash)
+						appendVerFile(*dirPtr+"/VERSION-"+*verPtr, fileName, hash, dirVal)
 					}
 					if (!strings.Contains(fileName, "VERSION-"+*verPtr)) && (jsonVal) {
 						if !jsonFirst {

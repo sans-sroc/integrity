@@ -19,6 +19,8 @@
 
 - `-f`: Only verify the "-first" version file
 
+- `-version`: Print the integrity version and exit
+
 ## Examples
 
 Create VERSION-TEST.txt manifest file in current directory
