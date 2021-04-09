@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-var rel_ver = "1.0.4"
+var rel_ver = "1.0.5"
 
 // Error handling function
 func check(e error, m string) {
