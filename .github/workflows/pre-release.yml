@@ -18,10 +18,9 @@ jobs:
     
       - name: "Build & test"
         run: |
-          env GOOS=windows GOARCH=amd64 go build -o /tmp/integrity-windows-amd64 integrity.go
+          env GOOS=windows GOARCH=amd64 go build -o /tmp/integrity.exe integrity.go
           env GOOS=linux GOARCH=amd64 go build -o /tmp/integrity-linux integrity.go
-          env GOOS=darwin GOARCH=amd64 go build -o /tmp/integrity-darwin integrity.go
-          mv /tmp/integrity-windows-amd64 /tmp/integrity.exe
+          env GOOS=darwin GOARCH=amd64 go build -o /tmp/integrity integrity.go
           
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
