@@ -72,6 +72,7 @@ func appendVerFile(verFile string, fileName string, sha256String string, dirVal 
 	f, err := os.OpenFile(verFile+".txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	check(err, "Cannot open file")
 	defer f.Close()
+	fileName = normalizeSlashes(fileName)
 	_, err = f.WriteString(fileName + ": " + sha256String + "\n")
 	check(err, "Cannot write to file")
 	err = f.Sync()
