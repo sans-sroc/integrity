@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-var rel_ver = "1.0.6"
+var rel_ver = "1.0.7"
 
 // Error handling function
 func check(e error, m string) {
@@ -40,6 +40,12 @@ func hashFileSha256(filePath string) (string, error) {
 	hashInBytes := hash.Sum(nil)[:32]
 	sha256String = hex.EncodeToString(hashInBytes)
 	return sha256String, nil
+}
+
+// Normalize slashes
+func normalizeSlashes(filePath string) string {
+	filePath = strings.Replace(filePath, "\\", "/", -1)
+	return filePath
 }
 
 // Create VERSION file and add headings
@@ -72,6 +78,7 @@ func appendVerFile(verFile string, fileName string, sha256String string, dirVal 
 	check(err, "Cannot write to file")
 
 	// Part VERSION file
+	dirVal = normalizeSlashes(dirVal)
 	_, err1 := os.Stat(dirVal + "/get_first")
 	if err1 == nil {
 		match, _ := regexp.MatchString("get[-_]first", fileName)
@@ -79,6 +86,7 @@ func appendVerFile(verFile string, fileName string, sha256String string, dirVal 
 			f, err := os.OpenFile(verFile+"-part.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			check(err, "Cannot open file")
 			defer f.Close()
+			fileName = normalizeSlashes(fileName)
 			_, err = f.WriteString(fileName + ": " + sha256String + "\n")
 			check(err, "Cannot write to file")
 			err = f.Sync()
@@ -90,6 +98,7 @@ func appendVerFile(verFile string, fileName string, sha256String string, dirVal 
 			f, err := os.OpenFile(verFile+"-first.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			check(err, "Cannot open file")
 			defer f.Close()
+			fileName = normalizeSlashes(fileName)
 			_, err = f.WriteString(filepath.Base(fileName) + ": " + sha256String + "\n")
 			check(err, "Cannot write to file")
 			err = f.Sync()
