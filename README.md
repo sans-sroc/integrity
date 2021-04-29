@@ -18,7 +18,6 @@ VERSION:
 AUTHORS:
    Ryan Nicholson <rnicholson@sans.org>
    Don Williams <dwilliams@sans.org>
-   Erik Kristensen <ekristensen@sans.org>
 
 COMMANDS:
    create    create integrity files
