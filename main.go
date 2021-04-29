@@ -35,10 +35,6 @@ func main() {
 			Name:  "Don Williams",
 			Email: "dwilliams@sans.org",
 		},
-		{
-			Name:  "Erik Kristensen",
-			Email: "ekristensen@sans.org",
-		},
 	}
 
 	app.Commands = common.GetCommands()
