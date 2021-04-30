@@ -3,60 +3,110 @@
 [![GitHub Super-Linter](https://github.com/sans-blue-team/integrity/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 [![pre-release](https://github.com/sans-blue-team/integrity/actions/workflows/pre-release.yml/badge.svg)](https://github.com/sans-blue-team/integrity/actions/workflows/pre-release.yml)
 
-## Command line flags
+## Help
 
-- `-d`: Specify directory (defaults to current directory)
+```
+NAME:
+   integrity - integrity
 
-- `-c`: Specify suffix to VERSION file
+USAGE:
+   integrity [global options] command [command options] [arguments...]
 
-  - For example, `-c SEC123-21-01` could create the file `VERSION-SEC123-21-01`
+VERSION:
+   v2.0.0
 
-- `-v`: Verify that the files created earlier by this tool have not changed
+AUTHORS:
+   Ryan Nicholson <rnicholson@sans.org>
+   Don Williams <dwilliams@sans.org>
 
-- `-j`: Output results as JSON instead of writing a VERSION file
+COMMANDS:
+   create    create integrity files
+   validate  validate integrity files
+   version   print version
+   help, h   Shows a list of commands or help for one command
 
-- `-p`: Only verify the "-part" version file
+GLOBAL OPTIONS:
+   --help, -h     show help (default: false)
+   --version, -v  print the version (default: false)
+```
 
-- `-f`: Only verify the "-first" version file
+### Create
 
-- `-version`: Print the integrity version and exit
+```
+NAME:
+   integrity create - create integrity files
+
+USAGE:
+   integrity create [command options] [arguments...]
+
+OPTIONS:
+   --log-level value, -l value           Log Level (default: "info") [$LOG_LEVEL]
+   --directory value, -d value           Target Directory (default: ".") [$DIRECTORY]
+   --courseware-version value, -c value  Coursware Version Identifier [$COURSEWARE_VERSION]
+   --json, -j                            Output in JSON (default: false)
+   --json-pretty                         Output JSON in Pretty Print Format (default: true)
+   --user value                          allow setting what user created the file (default: "ekristen")
+   --help, -h                            show help (default: false)
+
+```
+
+### Validate
+
+```
+NAME:
+   integrity validate - validate integrity files
+
+USAGE:
+   integrity validate [command options] [arguments...]
+
+OPTIONS:
+   --parts, -p                           Validate the VERSION-part.txt file (default: false)
+   --first, -f                           Validate the VERSION-first.txt file (default: false)
+   --log-level value, -l value           Log Level (default: "info") [$LOG_LEVEL]
+   --directory value, -d value           Target Directory (default: ".") [$DIRECTORY]
+   --courseware-version value, -c value  Coursware Version Identifier [$COURSEWARE_VERSION]
+   --json, -j                            Output in JSON (default: false)
+   --json-pretty                         Output JSON in Pretty Print Format (default: true)
+   --user value                          allow setting what user created the file (default: "ekristen")
+   --help, -h                            show help (default: false)
+```
 
 ## Examples
 
 Create VERSION-TEST.txt manifest file in current directory
 
 ```bash
-integrity -c TEST
+integrity create -c TEST
 ```
 
 Create VERSION-TEST.txt manifest file in the `/tmp` directory
 
 ```bash
-integrity -c TEST -d /tmp
+integrity create -c TEST -d /tmp
 ```
 
 Verify VERSION-TEST.txt manifest file in current working directory
 
 ```bash
-integrity -c TEST -v
+integrity validate -c TEST
 ```
 
 Verify VERSION-TEST.txt manifest file in the `/tmp` directory
 
 ```bash
-integrity -c TEST -d /tmp -v
+integrity validate -c TEST -d /tmp
 ```
 
 Output results as JSON (no VERSION file is created)
 
 ```bash
-integrity -c TEST -j
+integrity create -c TEST -j
 ```
 
 Verify VERSION-TEST.txt manifest in the `/tmp` directory and output the results in JSON
 
 ```bash
-integrity -c TEST -d /tmp -v -j
+integrity validate -c TEST -d /tmp -j
 ```
 
 ## Building additional versions
