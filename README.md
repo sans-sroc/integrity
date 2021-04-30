@@ -165,3 +165,11 @@ docker run -it --rm -v ${PWD}:/usr/src/integrity -w /usr/src/integrity \
     golang env GOOS=solaris GOARCH=amd64 go build \
     -o binaries/integrity-solaris-amd64 integrity.go
 ```
+
+## Development
+
+There are go modules included on this project, so you will need to make sure you run `go mod vendor` to bring them to your local directory if you are using the Makefile as the makefile prefers the use of the vendor directory.
+
+If you are simply running `go run main.go` the modules will be pulled from vendor or your go root depending on where it finds it. Golang will also automatically pull the mods down when you run if there are changes.
+
+During iterative updates if the modules change you will find yourself needing to run `go mod vendor` or at least `go mod download` to ensure you have the updated modules locally.
