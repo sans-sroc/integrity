@@ -31,7 +31,7 @@ if $(echo ${TAG} | grep -qE "^[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+$"); then
   MAIN_ONLY=false
 fi
 
-if [ "${BRANCH}" != "MAIN" ] && [ "${MAIN_ONLY}" == "true" ]; then
+if [ "${BRANCH}" != "main" ] && [ "${MAIN_ONLY}" == "true" ]; then
   echo "You must only be on the MAIN branch"
   exit 12
 fi
