@@ -32,7 +32,7 @@ func globalFlags() []cli.Flag {
 		},
 		&cli.StringFlag{
 			Name:     "courseware-version",
-			Usage:    "Coursware Version Identifier",
+			Usage:    "Courseware Version Identifier",
 			Aliases:  []string{"c"},
 			EnvVars:  []string{"COURSEWARE_VERSION"},
 			Required: true,

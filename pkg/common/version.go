@@ -1,10 +1,12 @@
 package common
 
+import "fmt"
+
 // NAME of the App
 var NAME = "integrity"
 
 // SUMMARY of the Version
-var SUMMARY = "dirty"
+var SUMMARY = fmt.Sprintf("%s-%s", VERSION, BRANCH)
 
 // BRANCH of the Version
 var BRANCH = "dev"
