@@ -51,6 +51,11 @@ if [ -f pkg/common/version.go ]; then
   rm pkg/common/*.bak
 fi
 
+if [ -f README.md ]; then
+  sed -i.bak "N;s/^VERSION:\n.*$/VERSION:\n   ${TAG}/g" README.md
+  rm README.md.bak
+fi
+
 git commit -a -m "${MSG}"
 git tag -m "${MSG}" ${VTAG}
 git push --follow-tags origin ${BRANCH}
