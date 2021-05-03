@@ -41,7 +41,7 @@ if [ "${VALID_TAG}" == "false" ]; then
   exit 10
 fi
 
-VTAG="v${TAG}"
+VTAG="${TAG}"
 MSG="version: ${TAG}"
 
 echo $TAG > VERSION
