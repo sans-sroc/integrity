@@ -5,15 +5,12 @@
 
 ## Help
 
-```
+```help
 NAME:
    integrity - integrity
 
 USAGE:
    integrity [global options] command [command options] [arguments...]
-
-VERSION:
-   v2.0.0
 
 AUTHORS:
    Ryan Nicholson <rnicholson@sans.org>
@@ -23,7 +20,6 @@ COMMANDS:
    create    create integrity files
    validate  validate integrity files
    version   print version
-   help, h   Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --help, -h     show help (default: false)
