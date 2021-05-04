@@ -12,7 +12,7 @@ var SUMMARY = fmt.Sprintf("%s-%s", VERSION, BRANCH)
 var BRANCH = "dev"
 
 // VERSION of Release
-var VERSION = "2.0.2"
+var VERSION = "2.1.0"
 
 // AppVersion --
 var AppVersion AppVersionInfo
