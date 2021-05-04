@@ -26,6 +26,7 @@ func main() {
 	app.Name = path.Base(os.Args[0])
 	app.Usage = common.AppVersion.Name
 	app.Version = common.AppVersion.Summary
+	app.HideHelpCommand = true
 	app.Authors = []*cli.Author{
 		{
 			Name:  "Ryan Nicholson",
