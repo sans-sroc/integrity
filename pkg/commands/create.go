@@ -35,11 +35,13 @@ func (w *createCommand) Execute(c *cli.Context) error {
 	fileVersionFirstPath := path.Join(dir, versionFirstFileName)
 
 	getFirstPath := path.Join(dir, "get_first")
+	getFirstExists := false
+	getFirstIsEmpty := true
 
 	if !jsonOut {
 		fmt.Println("[+] Working directory:", dir)
-		_, err := os.Stat(fileVersionPath)
-		if err == nil {
+
+		if _, err := os.Stat(fileVersionPath); err == nil {
 			fmt.Println("[!] VERSION file already exists! Overwriting!")
 			err = os.Remove(fileVersionPath)
 			if err != nil {
@@ -47,30 +49,38 @@ func (w *createCommand) Execute(c *cli.Context) error {
 				return err
 			}
 		}
-		_, err1 := os.Stat(fileVersionPartPath)
-		if err1 == nil {
-			err = os.Remove(fileVersionPartPath)
-			if err != nil {
+
+		if _, err := os.Stat(fileVersionPartPath); err == nil {
+			if err := os.Remove(fileVersionPartPath); err != nil {
 				logrus.WithError(err).Error("Cannot delete VERSION file")
 				return err
 			}
 		}
-		_, err2 := os.Stat(fileVersionFirstPath)
-		if err2 == nil {
-			err = os.Remove(fileVersionFirstPath)
-			if err != nil {
+
+		if _, err := os.Stat(fileVersionFirstPath); err == nil {
+			if err = os.Remove(fileVersionFirstPath); err != nil {
 				logrus.WithError(err).Error("Cannot delete VERSION file")
 				return err
 			}
 		}
-		_, err3 := os.Stat(getFirstPath)
-		if err3 == nil {
-			if err := utils.CreateVerFile(fileVersionPartPath, user); err != nil {
+
+		if _, err := os.Stat(getFirstPath); err == nil {
+			isEmpty, err := utils.IsDirectoryEmpty(getFirstPath)
+			if err != nil {
 				return err
 			}
 
-			if err := utils.CreateVerFile(fileVersionFirstPath, user); err != nil {
-				return err
+			getFirstExists = true
+			getFirstIsEmpty = isEmpty
+
+			if !isEmpty {
+				if err := utils.CreateVerFile(fileVersionPartPath, user); err != nil {
+					return err
+				}
+
+				if err := utils.CreateVerFile(fileVersionFirstPath, user); err != nil {
+					return err
+				}
 			}
 		}
 
@@ -137,7 +147,7 @@ func (w *createCommand) Execute(c *cli.Context) error {
 		for _, file := range files {
 			if !strings.Contains(file.Name, fmt.Sprintf("VERSION-%s", ver)) {
 				fmt.Println("[+] Processing " + file.Name + "...")
-				utils.AppendVerFile(fileVersionPath, fileVersionPartPath, fileVersionFirstPath, file.Name, file.Hash, dir)
+				utils.AppendVerFile(fileVersionPath, fileVersionPartPath, fileVersionFirstPath, file.Name, file.Hash, dir, getFirstExists, getFirstIsEmpty)
 			}
 		}
 

@@ -1,10 +1,9 @@
 package utils
 
 import (
+	"io"
 	"os"
-	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 
@@ -50,38 +49,51 @@ func CreateVerFile(verFile, username string) error {
 }
 
 // Add data for hashed file to VERSION file
-func AppendVerFile(verFile, verPartFile, verFirstFile, fileName, sha256String, dirVal string) {
+func AppendVerFile(verFile, verPartFile, verFirstFile, fileName, sha256String, dirVal string, getFirstExists, getFirstIsEmpty bool) {
 	// Main VERSION file
 	f, err := os.OpenFile(verFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	check(err, "Cannot open file")
 	defer f.Close()
+
 	fileName = NormalizeSlashes(fileName)
+
 	_, err = f.WriteString(fileName + ": " + sha256String + "\n")
 	check(err, "Cannot write to file")
 
-	// Part VERSION file
-	dirVal = NormalizeSlashes(dirVal)
-	_, err1 := os.Stat(path.Join(dirVal, "get_first"))
-	if err1 == nil {
-		match, _ := regexp.MatchString("get[-_]first", fileName)
-		if !match {
-			f, err := os.OpenFile(verPartFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-			check(err, "Cannot open file")
-			defer f.Close()
-			fileName = NormalizeSlashes(fileName)
-			_, err = f.WriteString(fileName + ": " + sha256String + "\n")
-			check(err, "Cannot write to file")
-		}
-
-		// First VERSION file
-		if match {
+	if getFirstExists && !getFirstIsEmpty {
+		if strings.Contains(fileName, "get_first") {
 			f, err := os.OpenFile(verFirstFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			check(err, "Cannot open file")
 			defer f.Close()
+
 			fileName = NormalizeSlashes(fileName)
+
 			_, err = f.WriteString(filepath.Base(fileName) + ": " + sha256String + "\n")
+			check(err, "Cannot write to file")
+		} else {
+			f, err := os.OpenFile(verPartFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			check(err, "Cannot open file")
+			defer f.Close()
+
+			fileName = NormalizeSlashes(fileName)
+
+			_, err = f.WriteString(fileName + ": " + sha256String + "\n")
 			check(err, "Cannot write to file")
 		}
 	}
+}
 
+// Borrowed from https://stackoverflow.com/questions/30697324/how-to-check-if-directory-on-path-is-empty
+func IsDirectoryEmpty(name string) (bool, error) {
+	f, err := os.Open(name)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true, nil
+	}
+	return false, err
 }
