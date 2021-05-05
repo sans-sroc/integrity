@@ -111,7 +111,7 @@ func (w *createCommand) Execute(c *cli.Context) error {
 				}
 
 				files = append(files, common.File{
-					Name: fileName,
+					Name: filepath.ToSlash(fileName),
 					Hash: hash,
 				})
 			}

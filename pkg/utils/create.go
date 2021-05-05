@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -21,26 +22,26 @@ func CreateVerFile(verFile, username string) error {
 	}
 	defer f.Close()
 
-	_, err = f.WriteString("# integrity " + common.AppVersion.Version + " output generated on " + timestamp + " by " + username + "\n")
-	if err != nil {
+	header := fmt.Sprintf("# integrity: %s output generated on %s by %s\n", common.AppVersion.Version, timestamp, username)
+
+	if _, err = f.WriteString(header); err != nil {
 		logrus.WithError(err).Error("cannot write to file")
 		return err
 	}
 
-	_, err = f.WriteString("# " + strings.Join(os.Args, " ") + "\n")
-	if err != nil {
+	args := fmt.Sprintf("# command: %s\n", strings.Join(os.Args, " "))
+
+	if _, err = f.WriteString(args); err != nil {
 		logrus.WithError(err).Error("cannot write to file")
 		return err
 	}
 
-	_, err = f.WriteString("# Filename: SHA256\n")
-	if err != nil {
+	if _, err = f.WriteString("# format: <filename>: <sha256>\n"); err != nil {
 		logrus.WithError(err).Error("cannot write to file")
 		return err
 	}
 
-	err = f.Sync()
-	if err != nil {
+	if _, err = f.WriteString("# version: 1\n"); err != nil {
 		logrus.WithError(err).Error("cannot write to file")
 		return err
 	}
@@ -50,12 +51,9 @@ func CreateVerFile(verFile, username string) error {
 
 // Add data for hashed file to VERSION file
 func AppendVerFile(verFile, verPartFile, verFirstFile, fileName, sha256String, dirVal string, getFirstExists, getFirstIsEmpty bool) {
-	// Main VERSION file
 	f, err := os.OpenFile(verFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	check(err, "Cannot open file")
 	defer f.Close()
-
-	fileName = NormalizeSlashes(fileName)
 
 	_, err = f.WriteString(fileName + ": " + sha256String + "\n")
 	check(err, "Cannot write to file")
@@ -66,16 +64,12 @@ func AppendVerFile(verFile, verPartFile, verFirstFile, fileName, sha256String, d
 			check(err, "Cannot open file")
 			defer f.Close()
 
-			fileName = NormalizeSlashes(fileName)
-
 			_, err = f.WriteString(filepath.Base(fileName) + ": " + sha256String + "\n")
 			check(err, "Cannot write to file")
 		} else {
 			f, err := os.OpenFile(verPartFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			check(err, "Cannot open file")
 			defer f.Close()
-
-			fileName = NormalizeSlashes(fileName)
 
 			_, err = f.WriteString(fileName + ": " + sha256String + "\n")
 			check(err, "Cannot write to file")
