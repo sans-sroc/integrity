@@ -43,7 +43,7 @@ func ValidateFiles(directory string, version string, parts bool, first bool, jso
 	re := regexp.MustCompile("(?m)(^[^#][^:]+):(.*)$")
 	allFiles := re.FindAllStringSubmatch(vfString, -1)
 	for i := 0; i < len(allFiles); i++ {
-		ofileNames[allFiles[i][1]] = strings.TrimSpace(allFiles[i][2])
+		ofileNames[filepath.ToSlash(allFiles[i][1])] = strings.TrimSpace(allFiles[i][2])
 	}
 
 	err = filepath.Walk(directory,
@@ -53,8 +53,12 @@ func ValidateFiles(directory string, version string, parts bool, first bool, jso
 			if !pathCheck.IsDir() {
 				hash, err2 := HashFileSha256(path)
 				check(err2, "Cannot hash file")
+
 				fileName, err2 := filepath.Rel(directory, path)
 				check(err2, "Cannot find file")
+
+				fileName = filepath.ToSlash(fileName)
+
 				match, _ := regexp.MatchString("VERSION-"+version+".*\\.txt", fileName)
 				if !match {
 					cfileNames[fileName] = hash
