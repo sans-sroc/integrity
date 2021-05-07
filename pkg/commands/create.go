@@ -98,15 +98,17 @@ func (w *createCommand) Execute(c *cli.Context) error {
 			}
 
 			if !pathCheck.IsDir() {
-				hash, err := utils.HashFileSha256(path)
-				if err != nil {
-					logrus.WithError(err).Error("Cannot hash file")
-					return err
-				}
-
 				fileName, err := filepath.Rel(dir, path)
 				if err != nil {
 					logrus.WithError(err).Error("Cannot determine file path")
+					return err
+				}
+
+				fmt.Println("[+] Processing " + fileName + "...")
+
+				hash, err := utils.HashFileSha256(path)
+				if err != nil {
+					logrus.WithError(err).Error("Cannot hash file")
 					return err
 				}
 
@@ -146,7 +148,6 @@ func (w *createCommand) Execute(c *cli.Context) error {
 	} else {
 		for _, file := range files {
 			if !strings.Contains(file.Name, fmt.Sprintf("VERSION-%s", ver)) {
-				fmt.Println("[+] Processing " + file.Name + "...")
 				utils.AppendVerFile(fileVersionPath, fileVersionPartPath, fileVersionFirstPath, file.Name, file.Hash, dir, getFirstExists, getFirstIsEmpty)
 			}
 		}
