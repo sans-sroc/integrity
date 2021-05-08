@@ -11,13 +11,14 @@ import (
 	"strings"
 
 	"github.com/sans-sroc/integrity/pkg/common"
+	"github.com/sirupsen/logrus"
 )
 
 func ValidateFiles(directory string, version string, parts bool, first bool, jsonOut bool, jsonPretty bool) bool {
 	var failed = false
 	verFile := ""
 
-	files := []common.File{}
+	files := []*common.File{}
 
 	versionFileName := fmt.Sprintf("VERSION-%s.txt", version)
 	versionPartFileName := fmt.Sprintf("VERSION-%s-part.txt", version)
@@ -46,61 +47,59 @@ func ValidateFiles(directory string, version string, parts bool, first bool, jso
 		ofileNames[filepath.ToSlash(allFiles[i][1])] = strings.TrimSpace(allFiles[i][2])
 	}
 
-	err = filepath.Walk(directory,
-		func(path string, info os.FileInfo, err error) error {
-			pathCheck, err2 := os.Stat(path)
-			check(err2, "Cannot find file")
-			if !pathCheck.IsDir() {
-				hash, err2 := HashFileSha256(path)
-				check(err2, "Cannot hash file")
+	currentFiles, err := GetFiles(directory)
+	if err != nil {
+		logrus.WithError(err).Error("unable to get files")
+		return false
+	}
 
-				fileName, err2 := filepath.Rel(directory, path)
-				check(err2, "Cannot find file")
+	for _, file := range currentFiles {
+		hash, err2 := HashFileSha256(file.Path)
+		check(err2, "Cannot hash file")
 
-				fileName = filepath.ToSlash(fileName)
+		fileName, err2 := filepath.Rel(directory, file.Path)
+		check(err2, "Cannot find file")
 
-				match, _ := regexp.MatchString("VERSION-"+version+".*\\.txt", fileName)
-				if !match {
-					cfileNames[fileName] = hash
-					if _, ok := ofileNames[fileName]; !ok {
-						files = append(files, common.File{
-							Name:   fileName,
-							Hash:   hash,
-							Status: "new",
-						})
+		match, _ := regexp.MatchString("VERSION-"+version+".*\\.txt", fileName)
+		if !match {
+			cfileNames[fileName] = hash
+			if _, ok := ofileNames[fileName]; !ok {
+				files = append(files, &common.File{
+					Name:   fileName,
+					Hash:   hash,
+					Status: "new",
+				})
 
-						if !jsonOut {
-							fmt.Println("[!] Validation failed! File has been added!")
-							fmt.Println("    File: " + fileName)
-							fmt.Println("    Hash: " + hash)
-							failed = true
-						}
-					}
+				if !jsonOut {
+					fmt.Println("[!] Validation failed! File has been added!")
+					fmt.Println("    File: " + fileName)
+					fmt.Println("    Hash: " + hash)
+					failed = true
+				}
+			}
 
-					if _, ok := ofileNames[fileName]; ok {
-						if ofileNames[fileName] != hash {
-							files = append(files, common.File{
-								Name:   fileName,
-								Hash:   hash,
-								Status: "failed",
-							})
+			if _, ok := ofileNames[fileName]; ok {
+				if ofileNames[fileName] != hash {
+					files = append(files, &common.File{
+						Name:   fileName,
+						Hash:   hash,
+						Status: "failed",
+					})
 
-							if !jsonOut {
-								fmt.Println("[!] Validation failed! File contents have been modified!")
-								fmt.Println("    File: " + fileName)
-								fmt.Println("    Hash: " + hash)
-								failed = true
-							}
-						}
+					if !jsonOut {
+						fmt.Println("[!] Validation failed! File contents have been modified!")
+						fmt.Println("    File: " + fileName)
+						fmt.Println("    Hash: " + hash)
+						failed = true
 					}
 				}
 			}
-			return nil
-		})
+		}
+	}
 
 	for name, hash := range ofileNames {
 		if _, ok := cfileNames[name]; !ok {
-			files = append(files, common.File{
+			files = append(files, &common.File{
 				Name:   name,
 				Hash:   hash,
 				Status: "missing",
