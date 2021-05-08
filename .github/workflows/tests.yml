@@ -70,6 +70,9 @@ jobs:
     steps:
       - uses: actions/download-artifact@v2
         with:
+          name: release
+      - uses: actions/download-artifact@v2
+        with:
           name: versions
       - run: chmod +x integrity*
         if: ${{ matrix.os != 'windows-latest' }}
