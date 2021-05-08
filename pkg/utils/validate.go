@@ -54,6 +54,10 @@ func ValidateFiles(directory string, version string, parts bool, first bool, jso
 	}
 
 	for _, file := range currentFiles {
+		if !jsonOut {
+			fmt.Println("[+] Validating " + file.Name + " ...")
+		}
+
 		hash, err2 := HashFileSha256(file.Path)
 		check(err2, "Cannot hash file")
 
