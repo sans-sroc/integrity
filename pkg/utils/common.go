@@ -46,7 +46,7 @@ func GetFiles(dir string) (files []*common.File, err error) {
 
 				files = append(files, &common.File{
 					Name: fileName,
-					Path: path,
+					Path: filepath.ToSlash(path),
 				})
 			}
 
