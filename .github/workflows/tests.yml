@@ -47,11 +47,11 @@ jobs:
         with:
           name: release
       - run: ./release/integrity.exe create -c ${{ matrix.os }}
-        if: ${{ matrix.src_os == "windows-latest" }}
+        if: ${{ matrix.src_os == 'windows-latest' }}
       - run: ./release/integrity-linux create -c ${{ matrix.os }}
-        if: ${{ matrix.src_os == "ubuntu-latest" }}
+        if: ${{ matrix.src_os == 'ubuntu-latest' }}
       - run: ./release/integrity create -c ${{ matrix.os }}
-        if: ${{ matrix.src_os == "macos-latest" }}
+        if: ${{ matrix.src_os == 'macos-latest' }}
       - uses: actions/upload-artifact@v2
         with:
           name: versions
@@ -70,8 +70,8 @@ jobs:
         with:
           name: versions
       - run: ./release/integrity.exe validate -c ${{ matrix.os }}
-        if: ${{ matrix.src_os == "windows-latest" }}
+        if: ${{ matrix.src_os == 'windows-latest' }}
       - run: ./release/integrity-linux validate -c ${{ matrix.os }}
-        if: ${{ matrix.src_os == "ubuntu-latest" }}
+        if: ${{ matrix.src_os == 'ubuntu-latest' }}
       - run: ./release/integrity validate -c ${{ matrix.os }}
-        if: ${{ matrix.src_os == "macos-latest" }}
+        if: ${{ matrix.src_os == 'macos-latest' }}
