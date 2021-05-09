@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
-	"strings"
 
 	"github.com/sans-sroc/integrity/pkg/common"
 	"github.com/sans-sroc/integrity/pkg/utils"
@@ -23,8 +21,6 @@ func (w *createCommand) Execute(c *cli.Context) error {
 	jsonOut := c.Bool("json")
 	pretty := c.Bool("json-pretty")
 	user := c.String("user")
-
-	files := []common.File{}
 
 	versionFileName := fmt.Sprintf("VERSION-%s.txt", ver)
 	versionPartFileName := fmt.Sprintf("VERSION-%s-part.txt", ver)
@@ -89,40 +85,23 @@ func (w *createCommand) Execute(c *cli.Context) error {
 		}
 	}
 
-	if err := filepath.Walk(dir,
-		func(path string, info os.FileInfo, err error) error {
-			pathCheck, err := os.Stat(path)
-			if err != nil {
-				logrus.WithError(err).Error("Cannot process file")
-				return err
-			}
-
-			if !pathCheck.IsDir() {
-				fileName, err := filepath.Rel(dir, path)
-				if err != nil {
-					logrus.WithError(err).Error("Cannot determine file path")
-					return err
-				}
-
-				fmt.Println("[+] Processing " + fileName + "...")
-
-				hash, err := utils.HashFileSha256(path)
-				if err != nil {
-					logrus.WithError(err).Error("Cannot hash file")
-					return err
-				}
-
-				files = append(files, common.File{
-					Name: filepath.ToSlash(fileName),
-					Hash: hash,
-				})
-			}
-
-			return nil
-		},
-	); err != nil {
-		logrus.WithError(err).Error("Validation failed")
+	files, err := utils.GetFiles(dir)
+	if err != nil {
 		return err
+	}
+
+	for _, file := range files {
+		if !jsonOut {
+			fmt.Println("[+] Processing " + file.Name + " ...")
+		}
+
+		hash, err := utils.HashFileSha256(file.Path)
+		if err != nil {
+			logrus.WithError(err).Error("Cannot hash file")
+			return err
+		}
+
+		file.Hash = hash
 	}
 
 	if jsonOut {
@@ -147,11 +126,8 @@ func (w *createCommand) Execute(c *cli.Context) error {
 		return nil
 	} else {
 		for _, file := range files {
-			if !strings.Contains(file.Name, fmt.Sprintf("VERSION-%s", ver)) {
-				utils.AppendVerFile(fileVersionPath, fileVersionPartPath, fileVersionFirstPath, file.Name, file.Hash, dir, getFirstExists, getFirstIsEmpty)
-			}
+			utils.AppendVerFile(fileVersionPath, fileVersionPartPath, fileVersionFirstPath, file.Name, file.Hash, dir, getFirstExists, getFirstIsEmpty)
 		}
-
 	}
 
 	return nil
