@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -15,6 +14,9 @@ import (
 )
 
 func ValidateFiles(directory string, version string, parts bool, first bool, jsonOut bool, jsonPretty bool) bool {
+	// Be sure to normalize \ to /
+	directory = filepath.ToSlash(directory)
+
 	var failed = false
 	verFile := ""
 
@@ -25,11 +27,11 @@ func ValidateFiles(directory string, version string, parts bool, first bool, jso
 	versionFirstFileName := fmt.Sprintf("VERSION-%s-first.txt", version)
 
 	if parts {
-		verFile = path.Join(directory, versionPartFileName)
+		verFile = filepath.Join(directory, versionPartFileName)
 	} else if first {
-		verFile = path.Join(directory, versionFirstFileName)
+		verFile = filepath.Join(directory, versionFirstFileName)
 	} else {
-		verFile = path.Join(directory, versionFileName)
+		verFile = filepath.Join(directory, versionFileName)
 	}
 	_, err := os.Stat(verFile)
 	check(err, "Cannot find VERSION file")

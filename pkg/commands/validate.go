@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/sans-sroc/integrity/pkg/common"
 	"github.com/sans-sroc/integrity/pkg/utils"
@@ -13,7 +14,7 @@ type validateCommand struct {
 
 func (w *validateCommand) Execute(c *cli.Context) error {
 	// Validate existing VERSION file(s)
-	dir := c.String("directory")
+	dir := filepath.ToSlash(c.String("directory"))
 	ver := c.String("courseware-version")
 	parts := c.Bool("parts")
 	first := c.Bool("first")
