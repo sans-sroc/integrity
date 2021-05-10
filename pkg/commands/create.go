@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/sans-sroc/integrity/pkg/common"
 	"github.com/sans-sroc/integrity/pkg/utils"
@@ -16,7 +17,7 @@ type createCommand struct {
 }
 
 func (w *createCommand) Execute(c *cli.Context) error {
-	dir := c.String("directory")
+	dir := filepath.ToSlash(c.String("directory"))
 	ver := c.String("courseware-version")
 	jsonOut := c.Bool("json")
 	pretty := c.Bool("json-pretty")
