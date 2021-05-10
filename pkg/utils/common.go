@@ -44,8 +44,10 @@ func GetFiles(dir string) (files []*common.File, err error) {
 
 				logrus.WithField("filename", fileName).Debug("found file")
 
+				// Both name and path must be ToSlash because the Name is what
+				// is ultimately written to the versioning file
 				files = append(files, &common.File{
-					Name: fileName,
+					Name: filepath.ToSlash(fileName),
 					Path: filepath.ToSlash(path),
 				})
 			}

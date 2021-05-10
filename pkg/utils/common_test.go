@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -31,7 +32,14 @@ func TestDefaultGetFiles(t *testing.T) {
 		},
 	}
 
-	files, err := GetFiles("testdata/default/")
+	for _, e := range expected {
+		e.Name = filepath.ToSlash(e.Name)
+		e.Path = filepath.ToSlash(e.Path)
+	}
+
+	directory := filepath.ToSlash("testdata/default/")
+
+	files, err := GetFiles(directory)
 	if err != nil {
 		t.Error(err)
 	}
@@ -66,7 +74,14 @@ func TestWithGetFirstGetFiles(t *testing.T) {
 		},
 	}
 
-	files, err := GetFiles("testdata/with-get-first")
+	for _, e := range expected {
+		e.Name = filepath.ToSlash(e.Name)
+		e.Path = filepath.ToSlash(e.Path)
+	}
+
+	directory := filepath.ToSlash("testdata/with-get-first/")
+
+	files, err := GetFiles(directory)
 	if err != nil {
 		t.Error(err)
 	}
