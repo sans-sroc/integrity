@@ -20,6 +20,10 @@ func (w *validateCommand) Execute(c *cli.Context) error {
 	json := c.Bool("json")
 	pretty := c.Bool("json-pretty")
 
+	if c.Args().Len() > 0 {
+		return fmt.Errorf("Positional arguments are not supported with this command.\n\nDid you mean to use `-d` to change the directory that the command runs against?\n\n")
+	}
+
 	failed := utils.ValidateFiles(dir, ver, parts, first, json, pretty)
 	if !json {
 		if failed {

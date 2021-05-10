@@ -22,6 +22,10 @@ func (w *createCommand) Execute(c *cli.Context) error {
 	pretty := c.Bool("json-pretty")
 	user := c.String("user")
 
+	if c.Args().Len() > 0 {
+		return fmt.Errorf("Positional arguments are not supported with this command.\n\nDid you mean to use `-d` to change the directory that the command runs against?\n\n")
+	}
+
 	versionFileName := fmt.Sprintf("VERSION-%s.txt", ver)
 	versionPartFileName := fmt.Sprintf("VERSION-%s-part.txt", ver)
 	versionFirstFileName := fmt.Sprintf("VERSION-%s-first.txt", ver)
