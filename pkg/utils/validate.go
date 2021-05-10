@@ -66,6 +66,9 @@ func ValidateFiles(directory string, version string, parts bool, first bool, jso
 		fileName, err2 := filepath.Rel(directory, file.Path)
 		check(err2, "Cannot find file")
 
+		// Ensure we normalize the slash before further use
+		fileName = filepath.ToSlash(fileName)
+
 		match, _ := regexp.MatchString("VERSION-"+version+".*\\.txt", fileName)
 		if !match {
 			cfileNames[fileName] = hash
