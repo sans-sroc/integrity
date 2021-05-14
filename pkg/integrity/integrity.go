@@ -114,9 +114,41 @@ func New(directory string, validate bool) (*Integrity, error) {
 	return i, nil
 }
 
-func (i *Integrity) SetAlgorithm(algorithm string) bool {
+func (i *Integrity) SetName(name string) error {
+	match, err := regexp.MatchString("[0-9]{3}.[0-9]{2}.[0-9][A-Z]?", name)
+	if err != nil {
+		return err
+	}
+
+	if !match {
+		return fmt.Errorf("%s does not match the required format", name)
+	}
+
+	i.Metadata.Name = name
+
+	return nil
+}
+
+func (i *Integrity) SetUser(user string) {
+	i.Metadata.CreatedBy = user
+}
+
+func (i *Integrity) SetIgnore(ignore []string) {
+	i.ignore = ignore
+
+	i.ignore = append(i.ignore, common.IgnoreAlways...)
+}
+
+func (i *Integrity) SetAlgorithm(algorithm string) error {
+	algorithm = strings.ToLower(algorithm)
+
+	if algorithm != "sha256" {
+		return fmt.Errorf("Algorithm %s is not supported", algorithm)
+	}
+
 	i.Metadata.Algorithm = algorithm
-	return true
+
+	return nil
 }
 
 func (i *Integrity) Checks() error {
@@ -363,31 +395,6 @@ func (i *Integrity) getFiles() (files []*File, err error) {
 	}
 
 	return files, nil
-}
-
-func (i *Integrity) SetName(name string) error {
-	match, err := regexp.MatchString("[0-9]{3}.[0-9]{2}.[0-9][A-Z]?", name)
-	if err != nil {
-		return err
-	}
-
-	if !match {
-		return fmt.Errorf("%s does not match the required format", name)
-	}
-
-	i.Metadata.Name = name
-
-	return nil
-}
-
-func (i *Integrity) SetUser(user string) {
-	i.Metadata.CreatedBy = user
-}
-
-func (i *Integrity) SetIgnore(ignore []string) {
-	i.ignore = ignore
-
-	i.ignore = append(i.ignore, common.IgnoreAlways...)
 }
 
 func (i *Integrity) GetValidationOutput(format string) ([]byte, error) {
