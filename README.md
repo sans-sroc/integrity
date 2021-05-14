@@ -1,7 +1,11 @@
-# integrity
+# Integrity
 
 [![GitHub Super-Linter](https://github.com/sans-blue-team/integrity/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 [![pre-release](https://github.com/sans-blue-team/integrity/actions/workflows/pre-release.yml/badge.svg)](https://github.com/sans-blue-team/integrity/actions/workflows/pre-release.yml)
+
+## Overview
+
+File validation at it's finest.
 
 ## Help
 
@@ -15,6 +19,7 @@ USAGE:
 AUTHORS:
    Ryan Nicholson <rnicholson@sans.org>
    Don Williams <dwilliams@sans.org>
+   Erik Kristensen <ekristensen@sans.org>
 
 COMMANDS:
    create    create integrity files
@@ -22,13 +27,12 @@ COMMANDS:
    version   print version
 
 GLOBAL OPTIONS:
-   --help, -h     show help (default: false)
-   --version, -v  print the version (default: false)
+   --help, -h  show help (default: false)
 ```
 
 ### Create
 
-```
+```help
 NAME:
    integrity create - create integrity files
 
@@ -36,19 +40,17 @@ USAGE:
    integrity create [command options] [arguments...]
 
 OPTIONS:
-   --log-level value, -l value           Log Level (default: "info") [$LOG_LEVEL]
-   --directory value, -d value           Target Directory (default: ".") [$DIRECTORY]
-   --courseware-version value, -c value  Coursware Version Identifier [$COURSEWARE_VERSION]
-   --json, -j                            Output in JSON (default: false)
-   --json-pretty                         Output JSON in Pretty Print Format (default: true)
-   --user value                          allow setting what user created the file (default: "ekristen")
-   --help, -h                            show help (default: false)
+   --name value, -n value       The name that will be given to the ISO volume during USB creation. [$NAME]
+   --user value, -u value       allow setting what user created the file (default: "ekristen") [$USER]
+   --log-level value, -l value  Log Level (default: "info") [$LOG_LEVEL]
+   --directory value, -d value  The directory that will be the current working directory for the tool when it runs (default: ".") [$DIRECTORY]
+   --help, -h                   show help (default: false)
 
 ```
 
 ### Validate
 
-```
+```help
 NAME:
    integrity validate - validate integrity files
 
@@ -56,56 +58,66 @@ USAGE:
    integrity validate [command options] [arguments...]
 
 OPTIONS:
-   --parts, -p                           Validate the VERSION-part.txt file (default: false)
-   --first, -f                           Validate the VERSION-first.txt file (default: false)
-   --log-level value, -l value           Log Level (default: "info") [$LOG_LEVEL]
-   --directory value, -d value           Target Directory (default: ".") [$DIRECTORY]
-   --courseware-version value, -c value  Coursware Version Identifier [$COURSEWARE_VERSION]
-   --json, -j                            Output in JSON (default: false)
-   --json-pretty                         Output JSON in Pretty Print Format (default: true)
-   --user value                          allow setting what user created the file (default: "ekristen")
-   --help, -h                            show help (default: false)
+   --output-format value, --format value  Chose which format to output the validation results (default is none) (valid options: none, json) (default: "none") [$OUTPUT_FORMAT]
+   --output value, -o value               When output-format is specified, this controls where it goes, (defaults to stdout) (default: "-") [$OUTPUT]
+   --log-level value, -l value            Log Level (default: "info") [$LOG_LEVEL]
+   --directory value, -d value            The directory that will be the current working directory for the tool when it runs (default: ".") [$DIRECTORY]
+   --help, -h                             show help (default: false)
 ```
+
+#### Validate Output
+
+The validate output options change the behavior of the too slightly.
+
+If the `--output-format` is set to `json` and the `--log-level` has not been set to `none` it will write all logs to `STDERR` while the JSON format is written to `STDOUT`, this is to allow the capture of the `json` separately from the log output.
 
 ## Examples
 
-Create VERSION-TEST.txt manifest file in current directory
+### Simple Create
 
 ```bash
-integrity create -c TEST
+integrity create -n 572.00.0
 ```
 
-Create VERSION-TEST.txt manifest file in the `/tmp` directory
+### Create w/ Specified Directory
 
 ```bash
-integrity create -c TEST -d /tmp
+integrity create -n 572.00.0 -d /tmp
 ```
 
-Verify VERSION-TEST.txt manifest file in current working directory
+### Simple Validate
+
+**Note:** this assumes the create was run in the current working directory and `sans-integrity.yml` already exists.
 
 ```bash
-integrity validate -c TEST
+integrity validate
 ```
 
-Verify VERSION-TEST.txt manifest file in the `/tmp` directory
+### Validate w/ Specified Directory
 
 ```bash
-integrity validate -c TEST -d /tmp
+integrity validate -d /tmp
 ```
 
-Output results as JSON (no VERSION file is created)
+### Validate w/ JSON Output
+
+**Note:** this is really only useful for programmatic validation purposes.
 
 ```bash
-integrity create -c TEST -j
+integrity validate --output-format json 
 ```
 
-Verify VERSION-TEST.txt manifest in the `/tmp` directory and output the results in JSON
+### Validate w/ JSON Output to File
+
+**Note:** this is really only useful for programmatic validation purposes.
 
 ```bash
-integrity validate -c TEST -d /tmp -j
+integrity validate --output-format json --output results.json
 ```
 
-## Building additional versions
+## Building
+
+### Building Additional Versions
 
 You can find three builds in the Releases section of GitHub, but to generate more, install go on your machine and set the environment variables `GOOS` and `GOARCH` for your target system:
 
@@ -169,3 +181,4 @@ There are go modules included on this project, so you will need to make sure you
 If you are simply running `go run main.go` the modules will be pulled from vendor or your go root depending on where it finds it. Golang will also automatically pull the mods down when you run if there are changes.
 
 During iterative updates if the modules change you will find yourself needing to run `go mod vendor` or at least `go mod download` to ensure you have the updated modules locally.
+

@@ -1,20 +1,14 @@
 package commands
 
 import (
-	"os/user"
+	"io/ioutil"
+	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
 func globalFlags() []cli.Flag {
-	var username string
-	u, err := user.Current()
-	if err != nil {
-		username = "unknown"
-	}
-	username = u.Username
-
 	globalFlags := []cli.Flag{
 		&cli.StringFlag{
 			Name:    "log-level",
@@ -25,32 +19,10 @@ func globalFlags() []cli.Flag {
 		},
 		&cli.StringFlag{
 			Name:    "directory",
-			Usage:   "Target Directory",
+			Usage:   "The directory that will be the current working directory for the tool when it runs",
 			Aliases: []string{"d"},
 			EnvVars: []string{"DIRECTORY"},
 			Value:   ".",
-		},
-		&cli.StringFlag{
-			Name:     "courseware-version",
-			Usage:    "Courseware Version Identifier",
-			Aliases:  []string{"c"},
-			EnvVars:  []string{"COURSEWARE_VERSION"},
-			Required: true,
-		},
-		&cli.BoolFlag{
-			Name:    "json",
-			Usage:   "Output in JSON",
-			Aliases: []string{"j"},
-		},
-		&cli.BoolFlag{
-			Name:  "json-pretty",
-			Usage: "Output JSON in Pretty Print Format",
-			Value: true,
-		},
-		&cli.StringFlag{
-			Name:  "user",
-			Usage: "allow setting what user created the file",
-			Value: username,
 		},
 	}
 
@@ -67,6 +39,12 @@ func globalBefore(c *cli.Context) error {
 		logrus.SetLevel(logrus.WarnLevel)
 	case "error":
 		logrus.SetLevel(logrus.ErrorLevel)
+	case "none":
+		logrus.SetOutput(ioutil.Discard)
+	}
+
+	if c.Bool("json") {
+		logrus.SetOutput(os.Stderr)
 	}
 
 	return nil
