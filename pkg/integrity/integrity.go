@@ -314,13 +314,36 @@ func (i *Integrity) getFiles() (files []*File, err error) {
 				}
 
 				for _, ignore := range i.ignore {
+					baseFileName := filepath.Base(fileName)
+					log := logrus.WithField("ignore", ignore).WithField("file", fileName).WithField("base", baseFileName)
+
 					if fileName == ignore {
+						log.WithField("reason", "full-filename-match").Debug("ignored file")
 						return nil
 					}
+
+					if baseFileName == ignore {
+						log.WithField("reason", "base-filename-match").Debug("ignored file")
+						return nil
+					}
+
 					if strings.HasPrefix(fileName, ignore) {
+						log.WithField("reason", "prefix-full-filename").Debug("ignored file")
 						return nil
 					}
+
+					if strings.HasPrefix(baseFileName, ignore) {
+						log.WithField("reason", "prefix-base-filename").Debug("ignored file")
+						return nil
+					}
+
 					if matched, _ := regexp.MatchString(ignore, fileName); matched {
+						log.WithField("reason", "regex-full-filename").Debug("ignored file")
+						return nil
+					}
+
+					if matched, _ := regexp.MatchString(ignore, baseFileName); matched {
+						log.WithField("reason", "regex-base-filename").Debug("ignored file")
 						return nil
 					}
 				}
