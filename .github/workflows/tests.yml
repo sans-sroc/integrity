@@ -62,7 +62,7 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
       - uses: actions/upload-artifact@v2
         with:
-          name: versions
+          name: integrity-${{ matrix.os }}
           path: sans-integrity*
 
   validate:
@@ -79,8 +79,7 @@ jobs:
           name: release
       - uses: actions/download-artifact@v2
         with:
-          name: versions
-          path: sans-integrity-${{ matrix.dst_os }}.yml
+          name: integrity-${{ matrix.dst_os }}
       - run: chmod +x integrity*
         if: ${{ matrix.os != 'windows-latest' }}
       - run: ./integrity.exe validate --filename sans-integrity-${{ matrix.dst_os }}.yml
