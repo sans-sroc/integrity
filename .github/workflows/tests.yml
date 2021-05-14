@@ -54,16 +54,16 @@ jobs:
           name: release
       - run: chmod +x integrity*
         if: ${{ matrix.os != 'windows-latest' }}
-      - run: ./integrity.exe create -c ${{ matrix.os }}
+      - run: ./integrity.exe create -n "100.00.0" --filename sans-integrity-${{ matrix.os }}.yml
         if: ${{ matrix.os == 'windows-latest' }}
-      - run: ./integrity-linux create -c ${{ matrix.os }}
+      - run: ./integrity-linux create -n "200.00.0" --filename sans-integrity-${{ matrix.os }}.yml
         if: ${{ matrix.os == 'ubuntu-latest' }}
-      - run: ./integrity create -c ${{ matrix.os }}
+      - run: ./integrity create -n "300.00.0" --filename sans-integrity-${{ matrix.os }}.yml
         if: ${{ matrix.os == 'macos-latest' }}
       - uses: actions/upload-artifact@v2
         with:
           name: versions
-          path: VERSION-*
+          path: sans-integrity*
 
   validate:
     strategy:
@@ -82,9 +82,9 @@ jobs:
           name: versions
       - run: chmod +x integrity*
         if: ${{ matrix.os != 'windows-latest' }}
-      - run: ./integrity.exe validate -c ${{ matrix.dst_os }}
+      - run: ./integrity.exe validate --filename sans-integrity-${{ matrix.dst_os }}.yml
         if: ${{ matrix.os == 'windows-latest' }}
-      - run: ./integrity-linux validate -c ${{ matrix.dst_os }}
+      - run: ./integrity-linux validate --filename sans-integrity-${{ matrix.dst_os }}.yml
         if: ${{ matrix.os == 'ubuntu-latest' }}
-      - run: ./integrity validate -c ${{ matrix.dst_os }}
+      - run: ./integrity validate --filename sans-integrity-${{ matrix.dst_os }}.yml
         if: ${{ matrix.os == 'macos-latest' }}

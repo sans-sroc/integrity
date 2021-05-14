@@ -26,6 +26,7 @@ func (w *createCommand) Execute(c *cli.Context) error {
 		return err
 	}
 
+	integrity.SetFilename(c.String("filename"))
 	integrity.SetUser(c.String("user"))
 	integrity.SetIgnore(c.StringSlice("ignore"))
 	integrity.SetAlgorithm(c.String("algorithm"))

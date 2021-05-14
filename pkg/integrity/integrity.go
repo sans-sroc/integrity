@@ -85,33 +85,12 @@ func New(directory string, validate bool) (*Integrity, error) {
 	i.directory = filepath.ToSlash(directory)
 	i.filename = filepath.Join(directory, common.Filename)
 
-	if i.validate {
-		if _, err := os.Stat(i.filename); err == nil {
-			if err := i.LoadFile(); err != nil {
-				return i, err
-			}
-		}
-	}
-
-	getFirstPath := filepath.Join(i.directory, common.GetFirstDirectory)
-
-	if _, err := os.Stat(getFirstPath); err == nil {
-		isEmpty, err := utils.IsDirectoryEmpty(getFirstPath)
-		if err != nil {
-			return i, err
-		}
-
-		i.getFirstExists = true
-		i.getFirstEmpty = isEmpty
-	}
-
-	if i.validate && i.getFirstExists && !i.getFirstEmpty {
-		i.getFirstValidate = true
-	}
-
-	i.expectedFiles = append(i.Files.Split, i.Files.Core...)
-
 	return i, nil
+}
+
+func (i *Integrity) SetFilename(name string) error {
+	i.filename = filepath.Join(i.directory, name)
+	return nil
 }
 
 func (i *Integrity) SetName(name string) error {
@@ -152,6 +131,32 @@ func (i *Integrity) SetAlgorithm(algorithm string) error {
 }
 
 func (i *Integrity) Checks() error {
+	if i.validate {
+		if _, err := os.Stat(i.filename); err == nil {
+			if err := i.LoadFile(); err != nil {
+				return err
+			}
+		}
+	}
+
+	getFirstPath := filepath.Join(i.directory, common.GetFirstDirectory)
+
+	if _, err := os.Stat(getFirstPath); err == nil {
+		isEmpty, err := utils.IsDirectoryEmpty(getFirstPath)
+		if err != nil {
+			return err
+		}
+
+		i.getFirstExists = true
+		i.getFirstEmpty = isEmpty
+	}
+
+	if i.validate && i.getFirstExists && !i.getFirstEmpty {
+		i.getFirstValidate = true
+	}
+
+	i.expectedFiles = append(i.Files.Split, i.Files.Core...)
+
 	if i.getFirstExists && i.getFirstEmpty {
 		return fmt.Errorf("%s exists and is empty, this is not allowed, please delete or populate files", common.GetFirstDirectory)
 	}

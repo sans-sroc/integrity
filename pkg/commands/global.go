@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/sans-sroc/integrity/pkg/common"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -23,6 +24,12 @@ func globalFlags() []cli.Flag {
 			Aliases: []string{"d"},
 			EnvVars: []string{"DIRECTORY"},
 			Value:   ".",
+		},
+		&cli.StringFlag{
+			Name:   "filename",
+			Usage:  "The integrity file",
+			Hidden: true,
+			Value:  common.Filename,
 		},
 	}
 
