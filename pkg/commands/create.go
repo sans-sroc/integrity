@@ -80,7 +80,7 @@ func init() {
 			Usage:   "Ignore files or directories as a direct match, prefix, or as a regular expressions",
 			Aliases: []string{"i"},
 			Hidden:  true,
-			Value:   cli.NewStringSlice(common.IgnoreFiles...),
+			Value:   cli.NewStringSlice(common.IgnoreOnCreate...),
 		},
 		&cli.StringFlag{
 			Name:    "user",

@@ -29,6 +29,8 @@ func (w *validateCommand) Execute(c *cli.Context) error {
 		return err
 	}
 
+	integrity.SetIgnore(common.IgnoreAlways)
+
 	if err := integrity.DiscoverFiles(); err != nil {
 		return err
 	}

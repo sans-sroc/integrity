@@ -313,21 +313,15 @@ func (i *Integrity) getFiles() (files []*File, err error) {
 					return err
 				}
 
-				if fileName == i.filename {
-					return nil
-				}
-
-				if !i.validate {
-					for _, ignore := range i.ignore {
-						if fileName == ignore {
-							return nil
-						}
-						if strings.HasPrefix(fileName, ignore) {
-							return nil
-						}
-						if matched, _ := regexp.MatchString(ignore, fileName); matched {
-							return nil
-						}
+				for _, ignore := range i.ignore {
+					if fileName == ignore {
+						return nil
+					}
+					if strings.HasPrefix(fileName, ignore) {
+						return nil
+					}
+					if matched, _ := regexp.MatchString(ignore, fileName); matched {
+						return nil
 					}
 				}
 
@@ -370,7 +364,7 @@ func (i *Integrity) SetUser(user string) {
 func (i *Integrity) SetIgnore(ignore []string) {
 	i.ignore = ignore
 
-	i.ignore = append(i.ignore, common.Filename)
+	i.ignore = append(i.ignore, common.IgnoreAlways...)
 }
 
 func (i *Integrity) GetValidationOutput(format string) ([]byte, error) {
