@@ -182,3 +182,10 @@ If you are simply running `go run main.go` the modules will be pulled from vendo
 
 During iterative updates if the modules change you will find yourself needing to run `go mod vendor` or at least `go mod download` to ensure you have the updated modules locally.
 
+### Ignore Files
+
+There are two types of ignore files. `IgnoreOnCreate` and `IgnoreAlways`, both are defined in [pkg/common/constants.go](pkg/common/constants.go). Files that should go in the `IgnoreOnCreate` are things like `.DS_Store`, whereas files that should go into `IgnoreAlways` is the `sans-integrity.yml` and all GPG files with a match of `.*\\.gpg$`.
+
+Changing the ignore files will require a new release of the tool.
+
+**Note:** to aid developers, the option `-i` is present that allows you to pass a custom ignore strictly for development purposes while testing and developing on the tool. This is useful when needing to ensure the validation tool is properly picking up files that are not in the file.
