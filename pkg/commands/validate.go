@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	"github.com/sans-sroc/integrity/pkg/common"
 	"github.com/sans-sroc/integrity/pkg/integrity"
@@ -16,15 +15,11 @@ type validateCommand struct {
 }
 
 func (w *validateCommand) Execute(c *cli.Context) error {
-	// Validate existing VERSION file(s)
-	dir := filepath.ToSlash(c.String("directory"))
-	//ver := c.String("courseware-version")
-	//parts := c.Bool("parts")
-	//first := c.Bool("first")
-	//json := c.Bool("json")
-	//pretty := c.Bool("json-pretty")
+	if c.Args().Len() > 0 {
+		return fmt.Errorf("Positional arguments are not supported with this command.\n\nDid you mean to use `-d` to change the directory that the command runs against?\n\n")
+	}
 
-	integrity, err := integrity.New(dir, true)
+	integrity, err := integrity.New(c.String("directory"), true)
 	if err != nil {
 		return err
 	}
@@ -45,7 +40,7 @@ func (w *validateCommand) Execute(c *cli.Context) error {
 	}
 
 	if identical {
-		logrus.Info("Success - all files validate")
+		logrus.Info("Success! All files successfully validated")
 	}
 
 	if c.String("output-format") == "json" {
