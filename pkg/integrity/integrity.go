@@ -70,7 +70,7 @@ func New(directory string, validate bool) (*Integrity, error) {
 		Version: 1,
 		Metadata: Metadata{
 			CreatedAt: time.Now().UTC(),
-			Version:   common.AppVersion.Version,
+			Version:   common.AppVersion.Summary,
 			Directory: filepath.ToSlash(abs),
 		},
 

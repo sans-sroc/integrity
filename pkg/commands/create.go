@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"os/user"
 
 	"github.com/sans-sroc/integrity/pkg/common"
@@ -12,13 +13,11 @@ type createCommand struct {
 }
 
 func (w *createCommand) Execute(c *cli.Context) error {
-	dir := c.String("directory")
-	//ver := c.String("courseware-version")
-	//jsonOut := c.Bool("json")
-	//pretty := c.Bool("json-pretty")
-	//user := c.String("user")
+	if c.Args().Len() > 0 {
+		return fmt.Errorf("Positional arguments are not supported with this command.\n\nDid you mean to use `-d` to change the directory that the command runs against?\n\n")
+	}
 
-	integrity, err := integrity.New(dir, false)
+	integrity, err := integrity.New(c.String("directory"), false)
 	if err != nil {
 		return err
 	}
