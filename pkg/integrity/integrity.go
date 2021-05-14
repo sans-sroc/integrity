@@ -55,6 +55,7 @@ type Integrity struct {
 	validate         bool
 	directory        string
 	filename         string
+	baseFilename     string
 	getFirstExists   bool
 	getFirstEmpty    bool
 	getFirstValidate bool
@@ -90,6 +91,7 @@ func New(directory string, validate bool) (*Integrity, error) {
 
 func (i *Integrity) SetFilename(name string) error {
 	i.filename = filepath.Join(i.directory, name)
+	i.baseFilename = name
 	return nil
 }
 
@@ -116,6 +118,7 @@ func (i *Integrity) SetIgnore(ignore []string) {
 	i.ignore = ignore
 
 	i.ignore = append(i.ignore, common.IgnoreAlways...)
+	i.ignore = append(i.ignore, i.baseFilename)
 }
 
 func (i *Integrity) SetAlgorithm(algorithm string) error {

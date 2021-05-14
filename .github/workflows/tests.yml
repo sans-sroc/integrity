@@ -80,6 +80,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: versions
+          path: sans-integrity-${{ matrix.dst_os }}.yml
       - run: chmod +x integrity*
         if: ${{ matrix.os != 'windows-latest' }}
       - run: ./integrity.exe validate --filename sans-integrity-${{ matrix.dst_os }}.yml
