@@ -10,7 +10,7 @@ var SUMMARY = "dirty"
 var BRANCH = "main"
 
 // VERSION of Release
-var VERSION = "3.0.0"
+var VERSION = "3.0.1"
 
 // AppVersion --
 var AppVersion AppVersionInfo
