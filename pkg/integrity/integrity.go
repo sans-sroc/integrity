@@ -96,13 +96,13 @@ func (i *Integrity) SetFilename(name string) error {
 }
 
 func (i *Integrity) SetName(name string) error {
-	match, err := regexp.MatchString("[0-9]{3}.[0-9]{2}.[0-9][A-Z]?", name)
+	match, err := regexp.MatchString(common.NameFormat, name)
 	if err != nil {
 		return err
 	}
 
 	if !match {
-		return fmt.Errorf("%s does not match the required format", name)
+		return fmt.Errorf("%s does not match the required format. Format: %s", name, common.NameFormat)
 	}
 
 	i.Metadata.Name = name

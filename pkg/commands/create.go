@@ -63,7 +63,7 @@ func init() {
 	flags := []cli.Flag{
 		&cli.StringFlag{
 			Name:     "name",
-			Usage:    "The name that will be given to the ISO volume during USB creation.",
+			Usage:    fmt.Sprintf("The name that will be given to the ISO volume during USB creation. Format: %s", common.NameFormat),
 			Aliases:  []string{"n"},
 			EnvVars:  []string{"NAME"},
 			Required: true,
