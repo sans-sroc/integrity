@@ -235,7 +235,7 @@ func (i *Integrity) CompareFiles() (identical bool, err error) {
 
 	for _, file := range i.validateFiles {
 		if _, ok := expected[file.Name]; !ok {
-			logrus.WithField("file", file.Name).WithField("status", "added").Warn("Added File")
+			logrus.WithField("file", file.Name).WithField("status", "added").Error("Added File")
 
 			file.Status = "added"
 			combined[file.Name] = file
@@ -251,7 +251,7 @@ func (i *Integrity) CompareFiles() (identical bool, err error) {
 				continue
 			}
 
-			logrus.WithField("status", "missing").WithField("file", file.Name).Warn("Missing File")
+			logrus.WithField("status", "missing").WithField("file", file.Name).Error("Missing File")
 			file.Status = "missing"
 			combined[file.Name] = file
 			identical = false
