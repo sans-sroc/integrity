@@ -96,12 +96,24 @@ func (i *Integrity) SetFilename(name string) error {
 }
 
 func (i *Integrity) SetName(name string) error {
-	match, err := regexp.MatchString(common.NameFormat, name)
+	re, err := regexp.Compile(common.NameFormat)
 	if err != nil {
 		return err
 	}
 
-	if !match {
+	matches := re.FindAllString(name, 4)
+	if len(matches) == 0 {
+		return fmt.Errorf("%s does not match the required format. Format: %s", name, common.NameFormat)
+	}
+
+	exactMatch := false
+	for _, m := range matches {
+		if m == name {
+			exactMatch = true
+		}
+	}
+
+	if !exactMatch {
 		return fmt.Errorf("%s does not match the required format. Format: %s", name, common.NameFormat)
 	}
 
