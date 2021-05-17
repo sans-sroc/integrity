@@ -307,13 +307,15 @@ func (i *Integrity) HashFiles() error {
 	for _, file := range files {
 		log := logrus.WithField("file", file.Name)
 
+		log.Info("Processing File")
+
 		hash, err := utils.HashFileSha256(file.Path)
 		if err != nil {
 			log.WithError(err).Error("unable to hash file")
 			return err
 		}
 
-		log.WithField("hash", hash).Infof("Processed File")
+		log.WithField("hash", hash).Debug("File Processed Successfully")
 
 		file.Hash = hash
 	}
