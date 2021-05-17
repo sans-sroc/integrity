@@ -1,20 +1,18 @@
 package commands
 
 import (
-	"os/user"
+	"io/ioutil"
+	"os"
+	"runtime"
 
+	"github.com/shiena/ansicolor"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+
+	"github.com/sans-sroc/integrity/pkg/common"
 )
 
 func globalFlags() []cli.Flag {
-	var username string
-	u, err := user.Current()
-	if err != nil {
-		username = "unknown"
-	}
-	username = u.Username
-
 	globalFlags := []cli.Flag{
 		&cli.StringFlag{
 			Name:    "log-level",
@@ -25,32 +23,16 @@ func globalFlags() []cli.Flag {
 		},
 		&cli.StringFlag{
 			Name:    "directory",
-			Usage:   "Target Directory",
+			Usage:   "The directory that will be the current working directory for the tool when it runs",
 			Aliases: []string{"d"},
 			EnvVars: []string{"DIRECTORY"},
 			Value:   ".",
 		},
 		&cli.StringFlag{
-			Name:     "courseware-version",
-			Usage:    "Courseware Version Identifier",
-			Aliases:  []string{"c"},
-			EnvVars:  []string{"COURSEWARE_VERSION"},
-			Required: true,
-		},
-		&cli.BoolFlag{
-			Name:    "json",
-			Usage:   "Output in JSON",
-			Aliases: []string{"j"},
-		},
-		&cli.BoolFlag{
-			Name:  "json-pretty",
-			Usage: "Output JSON in Pretty Print Format",
-			Value: true,
-		},
-		&cli.StringFlag{
-			Name:  "user",
-			Usage: "allow setting what user created the file",
-			Value: username,
+			Name:   "filename",
+			Usage:  "The integrity file",
+			Hidden: true,
+			Value:  common.Filename,
 		},
 	}
 
@@ -67,6 +49,21 @@ func globalBefore(c *cli.Context) error {
 		logrus.SetLevel(logrus.WarnLevel)
 	case "error":
 		logrus.SetLevel(logrus.ErrorLevel)
+	case "none":
+		logrus.SetOutput(ioutil.Discard)
+	}
+
+	if runtime.GOOS == "windows" {
+		logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
+		logrus.SetOutput(ansicolor.NewAnsiColorWriter(os.Stdout))
+	}
+
+	if c.Bool("json") {
+		logrus.SetOutput(os.Stderr)
+
+		if runtime.GOOS == "windows" {
+			logrus.SetOutput(ansicolor.NewAnsiColorWriter(os.Stderr))
+		}
 	}
 
 	return nil

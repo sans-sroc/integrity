@@ -11,7 +11,9 @@ import (
 func HashFileSha256(filePath string) (string, error) {
 	var sha256String string
 	file, err := os.Open(filePath)
-	check(err, "Error opening file")
+	if err != nil {
+		return "", nil
+	}
 
 	defer file.Close()
 	hash := sha256.New()

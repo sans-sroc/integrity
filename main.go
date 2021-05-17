@@ -27,6 +27,7 @@ func main() {
 	app.Usage = common.AppVersion.Name
 	app.Version = common.AppVersion.Summary
 	app.HideHelpCommand = true
+	app.HideVersion = true
 	app.Authors = []*cli.Author{
 		{
 			Name:  "Ryan Nicholson",
@@ -35,6 +36,10 @@ func main() {
 		{
 			Name:  "Don Williams",
 			Email: "dwilliams@sans.org",
+		},
+		{
+			Name:  "Erik Kristensen",
+			Email: "ekristensen@sans.org",
 		},
 	}
 

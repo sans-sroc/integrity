@@ -2,10 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"path/filepath"
+	"io/ioutil"
+	"os"
 
 	"github.com/sans-sroc/integrity/pkg/common"
-	"github.com/sans-sroc/integrity/pkg/utils"
+	"github.com/sans-sroc/integrity/pkg/integrity"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
@@ -13,21 +15,55 @@ type validateCommand struct {
 }
 
 func (w *validateCommand) Execute(c *cli.Context) error {
-	// Validate existing VERSION file(s)
-	dir := filepath.ToSlash(c.String("directory"))
-	ver := c.String("courseware-version")
-	parts := c.Bool("parts")
-	first := c.Bool("first")
-	json := c.Bool("json")
-	pretty := c.Bool("json-pretty")
+	if c.Args().Len() > 0 {
+		return fmt.Errorf("Positional arguments are not supported with this command.\n\nDid you mean to use `-d` to change the directory that the command runs against?\n\n")
+	}
 
-	failed := utils.ValidateFiles(dir, ver, parts, first, json, pretty)
-	if !json {
-		if failed {
-			fmt.Println("[!] Result: FAIL!")
-		} else {
-			fmt.Println("[+] Result: SUCCESS!")
+	integrity, err := integrity.New(c.String("directory"), true)
+	if err != nil {
+		return err
+	}
+
+	integrity.SetFilename(c.String("filename"))
+	integrity.SetIgnore(common.IgnoreAlways)
+
+	if err := integrity.Checks(); err != nil {
+		return err
+	}
+
+	if err := integrity.DiscoverFiles(); err != nil {
+		return err
+	}
+
+	if err := integrity.HashFiles(); err != nil {
+		return err
+	}
+
+	identical, err := integrity.CompareFiles()
+	if err != nil {
+		return err
+	}
+
+	if identical {
+		logrus.Info("Success! All files successfully validated")
+	}
+
+	if c.String("output-format") == "json" {
+		b, err := integrity.GetValidationOutput("json")
+		if err != nil {
+			return err
 		}
+
+		if c.String("output") == "-" {
+			os.Stdout.Write(b)
+			os.Stdout.Write([]byte("\n"))
+		} else {
+			ioutil.WriteFile(c.String("output"), b, 0644)
+		}
+	}
+
+	if !identical {
+		return fmt.Errorf("Validation Failed")
 	}
 
 	return nil
@@ -37,15 +73,19 @@ func init() {
 	cmd := validateCommand{}
 
 	flags := []cli.Flag{
-		&cli.BoolFlag{
-			Name:    "parts",
-			Usage:   "Validate the VERSION-part.txt file",
-			Aliases: []string{"p"},
+		&cli.StringFlag{
+			Name:    "output-format",
+			Usage:   "Chose which format to output the validation results (default is none) (valid options: none, json)",
+			Aliases: []string{"format"},
+			EnvVars: []string{"OUTPUT_FORMAT"},
+			Value:   "none",
 		},
-		&cli.BoolFlag{
-			Name:    "first",
-			Usage:   "Validate the VERSION-first.txt file",
-			Aliases: []string{"f"},
+		&cli.StringFlag{
+			Name:    "output",
+			Usage:   "When output-format is specified, this controls where it goes, (defaults to stdout)",
+			Aliases: []string{"o"},
+			EnvVars: []string{"OUTPUT"},
+			Value:   "-",
 		},
 	}
 
