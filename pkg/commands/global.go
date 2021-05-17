@@ -60,6 +60,10 @@ func globalBefore(c *cli.Context) error {
 
 	if c.Bool("json") {
 		logrus.SetOutput(os.Stderr)
+
+		if runtime.GOOS == "windows" {
+			logrus.SetOutput(ansicolor.NewAnsiColorWriter(os.Stderr))
+		}
 	}
 
 	return nil
