@@ -3,10 +3,13 @@ package commands
 import (
 	"io/ioutil"
 	"os"
+	"runtime"
 
-	"github.com/sans-sroc/integrity/pkg/common"
+	"github.com/shiena/ansicolor"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+
+	"github.com/sans-sroc/integrity/pkg/common"
 )
 
 func globalFlags() []cli.Flag {
@@ -48,6 +51,11 @@ func globalBefore(c *cli.Context) error {
 		logrus.SetLevel(logrus.ErrorLevel)
 	case "none":
 		logrus.SetOutput(ioutil.Discard)
+	}
+
+	if runtime.GOOS == "windows" {
+		logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
+		logrus.SetOutput(ansicolor.NewAnsiColorWriter(os.Stdout))
 	}
 
 	if c.Bool("json") {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/sans-sroc/integrity/pkg/common"
 	"github.com/sans-sroc/integrity/pkg/integrity"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
@@ -46,6 +47,8 @@ func (w *createCommand) Execute(c *cli.Context) error {
 	if err := integrity.WriteFile(); err != nil {
 		return err
 	}
+
+	logrus.Info("Integrity file created successfully!")
 
 	return nil
 }
