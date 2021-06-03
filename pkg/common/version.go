@@ -10,7 +10,7 @@ var SUMMARY = "3.0.1"
 var BRANCH = "main"
 
 // VERSION of Release
-var VERSION = "3.0.1"
+var VERSION = "3.0.2"
 
 // AppVersion --
 var AppVersion AppVersionInfo
