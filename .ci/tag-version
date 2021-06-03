@@ -48,6 +48,7 @@ echo $TAG > VERSION
 
 if [ -f pkg/common/version.go ]; then
   sed -i.bak "s/var VERSION = .*/var VERSION = \"${TAG}\"/g" pkg/common/version.go
+  set -i.bak "s/var SUMMARY = .*/var SUMMARY = \"${TAG}\"/g" pkg/common/version.go
   rm pkg/common/*.bak
 fi
 

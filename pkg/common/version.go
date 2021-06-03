@@ -4,7 +4,7 @@ package common
 var NAME = "integrity"
 
 // SUMMARY of the Version
-var SUMMARY = "dirty"
+var SUMMARY = "3.0.1"
 
 // BRANCH of the Version
 var BRANCH = "main"
