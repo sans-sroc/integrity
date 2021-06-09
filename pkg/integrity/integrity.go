@@ -339,12 +339,12 @@ func (i *Integrity) DiscoverFiles() error {
 	var err error
 
 	if i.validate {
-		i.validateFiles, err = i.getFiles()
+		i.validateFiles, err = i.GetFiles()
 		if err != nil {
 			return err
 		}
 	} else {
-		i.expectedFiles, err = i.getFiles()
+		i.expectedFiles, err = i.GetFiles()
 		if err != nil {
 			return err
 		}
@@ -353,7 +353,7 @@ func (i *Integrity) DiscoverFiles() error {
 	return nil
 }
 
-func (i *Integrity) getFiles() (files []*File, err error) {
+func (i *Integrity) GetFiles() (files []*File, err error) {
 	if err := filepath.Walk(i.directory,
 		func(path string, info os.FileInfo, err error) error {
 			pathCheck, err := os.Stat(path)
