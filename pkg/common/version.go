@@ -4,13 +4,13 @@ package common
 var NAME = "integrity"
 
 // SUMMARY of the Version
-var SUMMARY = "3.0.2"
+var SUMMARY = "3.1.0"
 
 // BRANCH of the Version
 var BRANCH = "main"
 
 // VERSION of Release
-var VERSION = "3.0.2"
+var VERSION = "3.1.0"
 
 // AppVersion --
 var AppVersion AppVersionInfo
