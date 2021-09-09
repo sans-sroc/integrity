@@ -1,9 +1,11 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/sans-sroc/integrity/pkg/common"
 	"github.com/sans-sroc/integrity/pkg/integrity"
@@ -22,6 +24,10 @@ func (w *validateCommand) Execute(c *cli.Context) error {
 	integrity, err := integrity.New(c.String("directory"), true)
 	if err != nil {
 		return err
+	}
+
+	if _, err := os.Stat(c.String("filename")); err != nil && strings.Contains(err.Error(), "no such file") {
+		return errors.New("Error: The sans-integrity.yml checksum file does not exit.")
 	}
 
 	integrity.SetFilename(c.String("filename"))
