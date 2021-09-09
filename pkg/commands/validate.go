@@ -25,7 +25,7 @@ func (w *validateCommand) Execute(c *cli.Context) error {
 		return err
 	}
 
-	if _, err := os.Stat(c.String("filename")); err != nil && strings.Contains(err.Error(), "no such file") {
+	if _, err := os.Stat(c.String("filename")); err != nil && strings.Contains(err.Error(), "Error: The sans-integrity.yml checksum file does not exist.") {
 		return err
 	}
 
