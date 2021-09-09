@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -25,8 +26,8 @@ func (w *validateCommand) Execute(c *cli.Context) error {
 		return err
 	}
 
-	if _, err := os.Stat(c.String("filename")); err != nil && strings.Contains(err.Error(), "Error: The sans-integrity.yml checksum file does not exist.") {
-		return err
+	if _, err := os.Stat(c.String("filename")); err != nil && strings.Contains(err.Error(), "no such file") {
+		return errors.New("Error: The sans-integrity.yml checksum file does not exit.")
 	}
 
 	integrity.SetFilename(c.String("filename"))
