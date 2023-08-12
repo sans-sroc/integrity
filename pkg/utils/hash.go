@@ -12,10 +12,10 @@ func HashFileSha256(filePath string) (string, error) {
 	var sha256String string
 	file, err := os.Open(filePath)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
-
 	defer file.Close()
+
 	hash := sha256.New()
 	if _, err := io.Copy(hash, file); err != nil {
 		return sha256String, err

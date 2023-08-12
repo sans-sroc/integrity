@@ -2,8 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"os/user"
-
 	"github.com/sans-sroc/integrity/pkg/common"
 	"github.com/sans-sroc/integrity/pkg/integrity"
 	"github.com/sirupsen/logrus"
@@ -28,7 +26,6 @@ func (w *createCommand) Execute(c *cli.Context) error {
 	}
 
 	integrity.SetFilename(c.String("filename"))
-	integrity.SetUser(c.String("user"))
 	integrity.SetIgnore(c.StringSlice("ignore"))
 	integrity.SetAlgorithm(c.String("algorithm"))
 
@@ -56,13 +53,6 @@ func (w *createCommand) Execute(c *cli.Context) error {
 func init() {
 	cmd := createCommand{}
 
-	var username string
-	u, err := user.Current()
-	if err != nil {
-		username = "unknown"
-	}
-	username = u.Username
-
 	flags := []cli.Flag{
 		&cli.StringFlag{
 			Name:     "name",
@@ -84,13 +74,6 @@ func init() {
 			Aliases: []string{"i"},
 			Hidden:  true,
 			Value:   cli.NewStringSlice(common.IgnoreOnCreate...),
-		},
-		&cli.StringFlag{
-			Name:    "user",
-			Usage:   "allow setting what user created the file",
-			Value:   username,
-			Aliases: []string{"u"},
-			EnvVars: []string{"USER"},
 		},
 	}
 
