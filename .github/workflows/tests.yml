@@ -17,11 +17,11 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Test
         run: go test ./...
 
@@ -29,15 +29,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "build"
         run: |
           make release-all
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: release
           path: release/*
@@ -60,7 +60,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
       - run: ./integrity create -n "300.00.0" --filename sans-integrity-${{ matrix.os }}.yml
         if: ${{ matrix.os == 'macos-latest' }}
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: integrity-${{ matrix.os }}
           path: sans-integrity*
