@@ -18,10 +18,8 @@ import (
 
 type Metadata struct {
 	Name      string    `json:"name" yaml:"name"`
-	CreatedBy string    `json:"created_by" yaml:"created_by"`
 	CreatedAt time.Time `json:"created_at" yaml:"created_at"`
 	Version   string    `json:"version" yaml:"version"`
-	Directory string    `json:"directory" yaml:"directory"`
 	Algorithm string    `json:"algorithm" yaml:"algorithm"`
 }
 
@@ -61,17 +59,11 @@ type Integrity struct {
 }
 
 func New(directory string, validate bool) (*Integrity, error) {
-	abs, err := filepath.Abs(directory)
-	if err != nil {
-		return nil, err
-	}
-
 	i := &Integrity{
 		Version: 1,
 		Metadata: Metadata{
 			CreatedAt: time.Now().UTC(),
 			Version:   common.AppVersion.Summary,
-			Directory: filepath.ToSlash(abs),
 		},
 
 		ignore:   []string{},
@@ -115,10 +107,6 @@ func (i *Integrity) SetName(name string) error {
 	i.Metadata.Name = name
 
 	return nil
-}
-
-func (i *Integrity) SetUser(user string) {
-	i.Metadata.CreatedBy = user
 }
 
 func (i *Integrity) SetIgnore(ignore []string) {
