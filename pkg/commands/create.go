@@ -2,10 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"github.com/sans-sroc/integrity/pkg/common"
-	"github.com/sans-sroc/integrity/pkg/integrity"
+
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+
+	"github.com/sans-sroc/integrity/pkg/common"
+	"github.com/sans-sroc/integrity/pkg/integrity"
 )
 
 type createCommand struct {
