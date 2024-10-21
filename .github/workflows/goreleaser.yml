@@ -8,6 +8,13 @@ on:
       - next
     tags:
       - "*"
+  pull_request:
+    branches:
+      - main
+      - next
+    paths:
+      - '**/*.go'
+      - 'main.go'
   release:
     types:
       - published
