@@ -37,7 +37,7 @@ jobs:
       - name: "build"
         run: |
           make release-all
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
           name: release
           path: release/*
@@ -49,7 +49,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: build
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: release
       - run: chmod +x integrity*
@@ -60,7 +60,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
       - run: ./integrity create -n "300.00.0" --filename sans-integrity-${{ matrix.os }}.yml
         if: ${{ matrix.os == 'macos-latest' }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
           name: integrity-${{ matrix.os }}
           path: sans-integrity*
@@ -74,10 +74,10 @@ jobs:
     needs:
       - create
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: release
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: integrity-${{ matrix.dst_os }}
       - run: chmod +x integrity*
