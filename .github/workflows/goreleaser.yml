@@ -35,23 +35,11 @@ jobs:
         with:
           go-version: 1.22.x
       - uses: anchore/sbom-action/download-syft@v0.15.11
-      - name: setup qemu
-        id: qemu
-        uses: docker/setup-qemu-action@v3
-      - name: setup docker buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: install cosign
         uses: sigstore/cosign-installer@v3
       - name: install quill
         env:
-          QUILL_VERSION: 0.4.1
+          QUILL_VERSION: 0.4.2
         run: |
           curl -Lo /tmp/quill_${QUILL_VERSION}_linux_amd64.tar.gz https://github.com/anchore/quill/releases/download/v${QUILL_VERSION}/quill_${QUILL_VERSION}_linux_amd64.tar.gz
           tar -xvf /tmp/quill_${QUILL_VERSION}_linux_amd64.tar.gz -C /tmp
@@ -89,10 +77,6 @@ jobs:
           args: release --clean ${{ env.GORELEASER_ARGS }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: push docker images (for branches)
-        if: github.ref == 'refs/heads/main' || github.event.pull_request.base.ref == 'main'
-        run: |
-          docker images --format "{{.Repository}}:{{.Tag}}" | grep "${{ github.repository }}" | xargs -L1 docker push
       - name: upload artifacts
         if: github.event.pull_request.base.ref == 'main'
         uses: actions/upload-artifact@v4

@@ -3,6 +3,7 @@ release:
   github:
     owner: sans-sroc
     name: integrity
+  make_latest: false
 env:
   - REGISTRY=ghcr.io
   - IMAGE=sans-sroc/integrity
