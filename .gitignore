@@ -10,3 +10,6 @@ release
 VERSION-*
 ?sans-integrity*
 sans-integrity*
+.envrc
+*.key
+.idea
