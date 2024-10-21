@@ -3,7 +3,6 @@ package integrity
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -89,19 +88,15 @@ func New(directory string, validate bool) (*Integrity, error) {
 	return i, nil
 }
 
-func (i *Integrity) SetFilename(name string) error {
+func (i *Integrity) SetFilename(name string) {
 	i.filename = filepath.Join(i.directory, name)
 	i.baseFilename = name
-	return nil
 }
 
-func (i *Integrity) SetName(name string) error {
-	re, err := regexp.Compile(common.NameFormat)
-	if err != nil {
-		return err
-	}
+var nameRe = regexp.MustCompile(common.NameFormat)
 
-	matches := re.FindAllString(name, 4)
+func (i *Integrity) SetName(name string) error {
+	matches := nameRe.FindAllString(name, 4)
 	if len(matches) == 0 {
 		return fmt.Errorf("%s does not match the required format. Format: %s", name, common.NameFormat)
 	}
@@ -137,7 +132,7 @@ func (i *Integrity) SetAlgorithm(algorithm string) error {
 	algorithm = strings.ToLower(algorithm)
 
 	if algorithm != "sha256" {
-		return fmt.Errorf("Algorithm %s is not supported", algorithm)
+		return fmt.Errorf("algorithm %s is not supported", algorithm)
 	}
 
 	i.Metadata.Algorithm = algorithm
@@ -170,7 +165,8 @@ func (i *Integrity) Checks() error {
 		i.getFirstValidate = true
 	}
 
-	i.expectedFiles = append(i.Files.Split, i.Files.Core...)
+	i.expectedFiles = i.Files.Split
+	i.expectedFiles = append(i.expectedFiles, i.Files.Core...)
 
 	if i.getFirstExists && i.getFirstEmpty {
 		return fmt.Errorf("%s exists and is empty, this is not allowed, please delete or populate files", common.GetFirstDirectory)
@@ -180,7 +176,7 @@ func (i *Integrity) Checks() error {
 }
 
 func (i *Integrity) LoadFile() error {
-	yamlFile, err := ioutil.ReadFile(i.filename)
+	yamlFile, err := os.ReadFile(i.filename)
 	if err != nil {
 		return err
 	}
@@ -205,7 +201,9 @@ func (i *Integrity) SortFiles() error {
 }
 
 func (i *Integrity) WriteFile() error {
-	i.SortFiles()
+	if err := i.SortFiles(); err != nil {
+		return err
+	}
 
 	data, err := yaml.Marshal(i)
 	if err != nil {
@@ -256,18 +254,20 @@ func (i *Integrity) CompareFiles() (identical bool, err error) {
 	}
 
 	for _, file := range i.expectedFiles {
-		if _, ok := actual[file.Name]; !ok {
-			if strings.HasPrefix(file.Name, common.GetFirstDirectory) && !i.getFirstValidate {
-				skippedSplit = true
-				logrus.WithField("file", file.Name).Debugf("skipping split file because directory %s does not exist", common.GetFirstDirectory)
-				continue
-			}
-
-			logrus.WithField("status", "missing").WithField("file", file.Name).Error("Missing File")
-			file.Status = "missing"
-			combined[file.Name] = file
-			identical = false
+		if _, ok := actual[file.Name]; ok {
+			continue
 		}
+
+		if strings.HasPrefix(file.Name, common.GetFirstDirectory) && !i.getFirstValidate {
+			skippedSplit = true
+			logrus.WithField("file", file.Name).Debugf("skipping split file because directory %s does not exist", common.GetFirstDirectory)
+			continue
+		}
+
+		logrus.WithField("status", "missing").WithField("file", file.Name).Error("Missing File")
+		file.Status = "missing"
+		combined[file.Name] = file
+		identical = false
 	}
 
 	for _, file := range i.validateFiles {
@@ -356,9 +356,9 @@ func (i *Integrity) DiscoverFiles() error {
 func (i *Integrity) GetFiles() (files []*File, err error) {
 	if err := filepath.Walk(i.directory,
 		func(path string, info os.FileInfo, err error) error {
-			pathCheck, err := os.Stat(path)
-			if err != nil {
-				return err
+			pathCheck, pathErr := os.Stat(path)
+			if pathErr != nil {
+				return pathErr
 			}
 
 			if !pathCheck.IsDir() {
