@@ -3,14 +3,18 @@ package common
 // NAME of the App
 var NAME = "integrity"
 
-// SUMMARY of the Version
-var SUMMARY = "3.1.0"
+// SUMMARY of the Version, this is using git describe
+// Note: This generally gets set to the major version of the app,
+// it gets set to the real version during the build process.
+var SUMMARY = "3.0.0"
 
 // BRANCH of the Version
 var BRANCH = "main"
 
 // VERSION of Release
-var VERSION = "3.1.0"
+// Note: This generally gets set to the major version of the app,
+// it gets set to the real version during the build process.
+var VERSION = "3.0.0"
 
 // AppVersion --
 var AppVersion AppVersionInfo
