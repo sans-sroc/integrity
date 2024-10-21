@@ -13,3 +13,4 @@ sans-integrity*
 .envrc
 *.key
 .idea
+dist
