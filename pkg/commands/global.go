@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"runtime"
 
@@ -50,7 +50,7 @@ func globalBefore(c *cli.Context) error {
 	case "error":
 		logrus.SetLevel(logrus.ErrorLevel)
 	case "none":
-		logrus.SetOutput(ioutil.Discard)
+		logrus.SetOutput(io.Discard)
 	}
 
 	if runtime.GOOS == "windows" {

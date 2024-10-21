@@ -15,36 +15,40 @@ type createCommand struct {
 
 func (w *createCommand) Execute(c *cli.Context) error {
 	if c.Args().Len() > 0 {
-		return fmt.Errorf("Positional arguments are not supported with this command.\n\nDid you mean to use `-d` to change the directory that the command runs against?\n\n")
+		return fmt.Errorf("positional arguments are not supported with this command.\n\n" + //nolint:stylecheck
+			"Did you mean to use `-d` to change the directory that the command runs against?\n\n")
 	}
 
-	integrity, err := integrity.New(c.String("directory"), false)
+	run, err := integrity.New(c.String("directory"), false)
 	if err != nil {
 		return err
 	}
 
-	if err := integrity.SetName(c.String("name")); err != nil {
+	if err := run.SetName(c.String("name")); err != nil {
 		return err
 	}
 
-	integrity.SetFilename(c.String("filename"))
-	integrity.SetUser(c.String("user"))
-	integrity.SetIgnore(c.StringSlice("ignore"))
-	integrity.SetAlgorithm(c.String("algorithm"))
+	run.SetFilename(c.String("filename"))
+	run.SetUser(c.String("user"))
+	run.SetIgnore(c.StringSlice("ignore"))
 
-	if err := integrity.Checks(); err != nil {
+	if err := run.SetAlgorithm(c.String("algorithm")); err != nil {
 		return err
 	}
 
-	if err := integrity.DiscoverFiles(); err != nil {
+	if err := run.Checks(); err != nil {
 		return err
 	}
 
-	if err := integrity.HashFiles(); err != nil {
+	if err := run.DiscoverFiles(); err != nil {
 		return err
 	}
 
-	if err := integrity.WriteFile(); err != nil {
+	if err := run.HashFiles(); err != nil {
+		return err
+	}
+
+	if err := run.WriteFile(); err != nil {
 		return err
 	}
 
@@ -56,12 +60,11 @@ func (w *createCommand) Execute(c *cli.Context) error {
 func init() {
 	cmd := createCommand{}
 
-	var username string
-	u, err := user.Current()
-	if err != nil {
-		username = "unknown"
+	username := "unknown"
+	u, _ := user.Current()
+	if u != nil {
+		username = u.Username
 	}
-	username = u.Username
 
 	flags := []cli.Flag{
 		&cli.StringFlag{

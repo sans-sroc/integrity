@@ -3,7 +3,6 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -18,34 +17,35 @@ type validateCommand struct {
 
 func (w *validateCommand) Execute(c *cli.Context) error {
 	if c.Args().Len() > 0 {
-		return fmt.Errorf("Positional arguments are not supported with this command.\n\nDid you mean to use `-d` to change the directory that the command runs against?\n\n")
+		return fmt.Errorf("positional arguments are not supported with this command.\n\n" + //nolint:stylecheck
+			"did you mean to use `-d` to change the directory that the command runs against?\n\n")
 	}
 
-	integrity, err := integrity.New(c.String("directory"), true)
+	run, err := integrity.New(c.String("directory"), true)
 	if err != nil {
 		return err
 	}
 
 	if _, err := os.Stat(c.String("filename")); err != nil && strings.Contains(err.Error(), "no such file") {
-		return errors.New("Error: The sans-integrity.yml checksum file does not exit.")
+		return errors.New("the sans-integrity.yml checksum file does not exist")
 	}
 
-	integrity.SetFilename(c.String("filename"))
-	integrity.SetIgnore(common.IgnoreAlways)
+	run.SetFilename(c.String("filename"))
+	run.SetIgnore(common.IgnoreAlways)
 
-	if err := integrity.Checks(); err != nil {
+	if err := run.Checks(); err != nil {
 		return err
 	}
 
-	if err := integrity.DiscoverFiles(); err != nil {
+	if err := run.DiscoverFiles(); err != nil {
 		return err
 	}
 
-	if err := integrity.HashFiles(); err != nil {
+	if err := run.HashFiles(); err != nil {
 		return err
 	}
 
-	identical, err := integrity.CompareFiles()
+	identical, err := run.CompareFiles()
 	if err != nil {
 		return err
 	}
@@ -55,21 +55,23 @@ func (w *validateCommand) Execute(c *cli.Context) error {
 	}
 
 	if c.String("output-format") == "json" {
-		b, err := integrity.GetValidationOutput("json")
+		b, err := run.GetValidationOutput("json")
 		if err != nil {
 			return err
 		}
 
 		if c.String("output") == "-" {
-			os.Stdout.Write(b)
-			os.Stdout.Write([]byte("\n"))
+			_, _ = os.Stdout.Write(b)
+			_, _ = os.Stdout.WriteString("\n")
 		} else {
-			ioutil.WriteFile(c.String("output"), b, 0644)
+			if err := os.WriteFile(c.String("output"), b, 0600); err != nil {
+				return err
+			}
 		}
 	}
 
 	if !identical {
-		return fmt.Errorf("Validation Failed")
+		return fmt.Errorf("validation Failed")
 	}
 
 	return nil
