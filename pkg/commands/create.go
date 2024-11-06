@@ -2,12 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"os/user"
+
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 
 	"github.com/sans-sroc/integrity/pkg/common"
 	"github.com/sans-sroc/integrity/pkg/integrity"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
 )
 
 type createCommand struct {
@@ -29,7 +29,6 @@ func (w *createCommand) Execute(c *cli.Context) error {
 	}
 
 	run.SetFilename(c.String("filename"))
-	run.SetUser(c.String("user"))
 	run.SetIgnore(c.StringSlice("ignore"))
 
 	if err := run.SetAlgorithm(c.String("algorithm")); err != nil {
@@ -60,12 +59,6 @@ func (w *createCommand) Execute(c *cli.Context) error {
 func init() {
 	cmd := createCommand{}
 
-	username := "unknown"
-	u, _ := user.Current()
-	if u != nil {
-		username = u.Username
-	}
-
 	flags := []cli.Flag{
 		&cli.StringFlag{
 			Name:     "name",
@@ -90,8 +83,7 @@ func init() {
 		},
 		&cli.StringFlag{
 			Name:    "user",
-			Usage:   "allow setting what user created the file",
-			Value:   username,
+			Usage:   "DEPRECATED: no longer used -- allow setting what user created the file",
 			Aliases: []string{"u"},
 			EnvVars: []string{"USER"},
 		},
