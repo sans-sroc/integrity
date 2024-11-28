@@ -3,7 +3,7 @@ module github.com/sans-sroc/integrity
 go 1.22
 
 require (
-	github.com/shiena/ansicolor v0.0.0-20200904210342-c7312218db18
+	github.com/shiena/ansicolor v0.0.0-20230509054315-a9deabde6e02
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.5
 	gopkg.in/yaml.v2 v2.4.0
