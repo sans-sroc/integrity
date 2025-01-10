@@ -40,7 +40,7 @@ jobs:
       - name: "build"
         run: |
           make release-all
-      - uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
+      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
           name: release
           path: release/*
@@ -63,7 +63,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
       - run: ./integrity create -n "300.00.0" --filename sans-integrity-${{ matrix.os }}.yml
         if: ${{ matrix.os == 'macos-latest' }}
-      - uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
+      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
           name: integrity-${{ matrix.os }}
           path: sans-integrity*
