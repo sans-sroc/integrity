@@ -54,8 +54,8 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
-        ".*.go$"
+      "managerFilePatterns": [
+        "/.*.go$/"
       ],
       "matchStrings": [
         "\"(?<currentValue>.*)\" // renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s"
@@ -64,8 +64,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "^.github/workflows/.*"
+      "managerFilePatterns": [
+        "/^.github/workflows/.*/"
       ],
       "matchStrings": [
         "go-version: (?<currentValue>.*?).x\n"
